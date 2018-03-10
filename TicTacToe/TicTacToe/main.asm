@@ -1,5 +1,11 @@
 
-.DEF BUTTON_PIN = R16	; Przycisk ktory zostal wcisniety
+cli //wy³¹czenie przerwañ 
+ldi R16, HIGH(RAMEND)        //za³adowanie adresu koñca pamiêci[sta³a RAMEND - zdefiniowana w pliku m32def.inc](starszej jego czêœæi) SRAM do R16 
+out SPH, R16                //za³adowanie zawartoœci rejestru R16 do SPH(starszej czêœæi) rejestru który przechowuje tzw. wskaŸnik koñca stosu 
+ldi R16, LOW(RAMEND)        //za³adowanie (mlodszej czesci) adresu konca pamieci sram do R16 
+out SPL, R16                //przepisanie R16 do SPL -rejestru który przechowuje wska¿nik koñca stosu(m³odszej czesci) 
+
+.DEF BUTTON_PIN = R21	; Przycisk ktory zostal wcisniety
 .DEF LED_PIN = R17 ; bit diody	(PB5)	(Pin 13 ARDU)
 LDI BUTTON_PIN, 0x00
 LDI LED_PIN, 0b10000000
@@ -14,16 +20,17 @@ OUT DDRD, LED_PIN
 start:
     RCALL checkButtons
 
-	LDI R30, 0x03
+	LDI R30, 0x01
 	CP BUTTON_PIN, R30
-	//BREQ delay50ms ; delay
-	//CP BUTTON_PIN, R30
+	BREQ delayAndCheckButtonsAgain ; delay
+	backDelay:
 
+	CP BUTTON_PIN, R30
 	BREQ zapal
 	rjmp zgas
 	dalej:
 
-	LDI BUTTON_PIN, 0x00	; Wyczyszczenie z pamieci ostatniego przycisku (zostal juz obsluzony)
+	//LDI BUTTON_PIN, 0x00	; Wyczyszczenie z pamieci ostatniego przycisku (zostal juz obsluzony)
     rjmp start
 
 
@@ -35,12 +42,17 @@ zgas:
 	CBI PORTD, 7
 	rjmp dalej
 
+delayAndCheckButtonsAgain:
+	RCALL delay50ms
+	RCALL checkButtons
+	rjmp backDelay
+
 delay50ms:
 	; ============================= 
 	;    delay loop generator 
 	;     800000 cycles:
 	; ----------------------------- 
-	; delaying 799995 cycles:
+	; delaying 799996 cycles:
 			  ldi  R18, $5F
 	WGLOOP0:  ldi  R19, $17
 	WGLOOP1:  ldi  R20, $79
