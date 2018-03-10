@@ -22,7 +22,9 @@
 ;player
 .equ P1 =	0b01000000
 .equ P2 =	0b10000000
-
+---------------------------------------------------------------------------------
+; TODO: ZMIANA STEROWANIA Z JEdyNKI STERUJACEJ NA ZERO STERUJACE DLA COLUMN !!!
+---------------------------------------------------------------------------------
 ; Replace with your application code
 start:
 	ldi r17, 0b00000111
