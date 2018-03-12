@@ -1,48 +1,42 @@
+cli						; wyl¹czenie przerwan
+ldi R16, HIGH(RAMEND)   ; zaladowanie adresu konca pamieci[stala RAMEND - zdefiniowana w pliku](starszej jego czesci) SRAM do R16 
+out SPH, R16            ; zaladowanie zawartosci rejestru R16 do SPH(starszej czesci) rejestru ktory przechowuje tzw. wskaznik konca stosu 
+ldi R16, LOW(RAMEND)    ; zaladowanie (mlodszej czesci) adresu konca pamieci sram do R16 
+out SPL, R16			; przepisanie R16 do SPL - rejestru który przechowuje wskaznik konca stosu(mlodszej czesci) 
 
-cli //wy³¹czenie przerwañ 
-ldi R16, HIGH(RAMEND)        //za³adowanie adresu koñca pamiêci[sta³a RAMEND - zdefiniowana w pliku m32def.inc](starszej jego czêœæi) SRAM do R16 
-out SPH, R16                //za³adowanie zawartoœci rejestru R16 do SPH(starszej czêœæi) rejestru który przechowuje tzw. wskaŸnik koñca stosu 
-ldi R16, LOW(RAMEND)        //za³adowanie (mlodszej czesci) adresu konca pamieci sram do R16 
-out SPL, R16                //przepisanie R16 do SPL -rejestru który przechowuje wska¿nik koñca stosu(m³odszej czesci) 
-
-.DEF BUTTON_PIN = R21	; Przycisk ktory zostal wcisniety
-.DEF LED_PIN = R17 ; bit diody	(PB5)	(Pin 13 ARDU)
-LDI BUTTON_PIN, 0x00
-LDI LED_PIN, 0b10000000
+.DEF BUTTON_PIN = R21		; Miejsce w pamieci na ktory zostal wcisniety
+.DEF LED_PIN = R17			; Rejestr na trzymanie w pamieci diody
+LDI BUTTON_PIN, 0x00		; Przypisanie zera do przycisku - zaden nie zostal wcisniety
+LDI LED_PIN, 0b10000000		; bit diody	(PB5) (Pin 13 ARDU) - sluzy do debugowania
 
 LDI R31, 0b00111000		; PIN 3,4,5 portu B ustawione jako wyjscia
 OUT DDRB, R31			; Przypisanie wartosci do portu
-LDI R31, 0b00111111		; rezystory pull-up na pinie 3,4,5
+LDI R31, 0b00111111		; rezystory pull-up na pinie 0,1,2,3,4,5
 OUT PORTB, R31			; Przypisanie wartosci do portu. Sterowanie bêdzie 0
 
-OUT DDRD, LED_PIN
+OUT DDRD, LED_PIN		; Ustawienie pinu diody jako wyjscie
 
-start:
-    RCALL checkButtons
+start:	; Glowna petla programu
+    RCALL checkButtons	; Wywolanie funkcji do sprawdzenia przyciskow
 
-	LDI R30, 0x01
-	//CP BUTTON_PIN, R30
-	//BREQ delayAndCheckButtonsAgain ; delay
-	//backDelay:
+	LDI R30, 0x01		; Numer przycisku do porownania (na jego podstawie wlaczy sie dioda)
 
-	CP BUTTON_PIN, R30
-	BREQ zapal
-	rjmp zgas
-	dalej:
+	CP BUTTON_PIN, R30	; Porownanie przycisku z rejestrem porownawczym
+	BREQ zapal			; Jesli warunek jest spelniony (zmienne sa sobie rowne, to zapal)
+	rjmp zgas			; Jesli warunek nie jest spelniony. Tu mozna byloby uzyc RCALL, ale wyzej niestety nie, przez co nie bylo gdzie wrocic
+	dalej:				; miejsce do powrotu z funcji warunkowych
 
-	//LDI BUTTON_PIN, 0x00	; Wyczyszczenie z pamieci ostatniego przycisku (zostal juz obsluzony)
     rjmp start
 
-
 zapal:
-	SBI PORTD, 7
-	rjmp zapal
+	SBI PORTD, 7		; Ustawienie na 7 bicie stanu wysokiego (zapalenie diody)
+	rjmp dalej			; powrot do instrukcji (Jesli przycisk jest przytrzymany, to dioda sie swieci ciagle)
 
 zgas:
-	CBI PORTD, 7
-	rjmp dalej
+	CBI PORTD, 7		; Ustawienie na 7 bicie stanu niskiego (zgaszenie diody)
+	rjmp dalej			; powrot dalej do petli programu
 
-delay50ms:
+delay50ms:	; Delay na 50ms. sluzy na debounce przyciskow
 	; ============================= 
 	;    delay loop generator 
 	;     800000 cycles:
@@ -66,26 +60,31 @@ delay50ms:
 
 ret
 
-checkButtons:
-	ldi  R29, 0x02
+; Zasada dzialania funkcji:
+; - sprawdz czy zostal wcisniety jakis przycisk. 
+; Jesli nie, to ustaw stan przycisku na 0
+; jesli zostal wcisniety, to przypisuje mu odpowiedni numer i nastepnie
+; wchodzi do funkcji, gdzie jest sprawdzany rejestr R29 - ktory dba o to by delay wykonal sie tylko raz
+; Jesli jest to pierwsze wykonanie funkcji to odczekaj 50ms i nastepnie znow sprawdz stan przycisku
+; jesli dalej jest jakis wcisniety, to zwroc jego numer,
+; jesli jednak juz zaden - to zeruje przycisk i nastepuje koniec
+; Posiada obsluge DEBOUNCE
+checkButtons:		; Sprawdzenie czy zostal wcisniety jakis przycisk
+	ldi  R29, 0x02	
 
 	buttonLoop:
-		LDI R31, 0b00110111
-		OUT PORTB, R31
-		NOP
-		NOP
-		NOP
-		SBIS PINB, 0
+		LDI R31, 0b00110111	; Ustawienie na wyjsciu samych 1 i jednego zera. Wejscia podciagniete w gore
+		OUT PORTB, R31		; Przypisanie wartosci do portu B
+		NOP					; instrukcja NOP -> bez niej nie dziala sprawdzenie portu. Danie chwilki czasu, by procesor ulozyl dane
+		SBIS PINB, 0		; Sprawdzenie czy jest 0 odczytane na pinie 0. Jesli tak, to wykonaj instrukcje, a jesli nie, to idz dalej
 			rjmp pin1
 		SBIS PINB, 1
 			rjmp pin2
 		SBIS PINB, 2
 			rjmp pin3
 
-		LDI R31, 0b00101111
+		LDI R31, 0b00101111	; Schemat dzialania podobny, tylko teraz inna kolumna jest wyzerowana
 		OUT PORTB, R31
-		NOP
-		NOP
 		NOP
 		SBIS PINB, 0
 			rjmp pin4
@@ -97,8 +96,6 @@ checkButtons:
 		LDI R31, 0b00011111
 		OUT PORTB, R31
 		NOP
-		NOP
-		NOP
 		SBIS PINB, 0
 			rjmp pin7
 		SBIS PINB, 1
@@ -106,21 +103,21 @@ checkButtons:
 		SBIS PINB, 2
 			rjmp pin9
 
-	LDI BUTTON_PIN, 0x00
+	LDI BUTTON_PIN, 0x00	; Jesli zaden przycisk nie zostal wcisniety, to przypisz wartosc 0.
 ret
 
-decrement:
+decrement:	; Sprawdzenie ktory raz sie powtarza funkcja. jesli pierwszy raz to dac opoznienie, jesli nie, to wrocic do petli glownej
 	dec R29
 	brne delayAndCheckButtonsAgain
 	ret
 
-delayAndCheckButtonsAgain:
-	RCALL delay50ms
+delayAndCheckButtonsAgain:	; Odczekaj 50ms i nastepnie wykonaj sprawdzenie przyciskow jeszcze raz
+	RCALL delay50ms	; Niweluje DEBOUNCE przycisku
 	rjmp buttonLoop
 
 pin1:
-	LDI BUTTON_PIN, 0x01
-	rjmp decrement
+	LDI BUTTON_PIN, 0x01	; Przypisz odpowiednia cyfre do przycisku
+	rjmp decrement			; wywolaj funkcje dekrement, by zniwelowac DEBOUNCE
 
 pin2:
 	LDI BUTTON_PIN, 0x02
