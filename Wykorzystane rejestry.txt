@@ -1,0 +1,16 @@
+R16 -> Wskaźnik stosu. Potrzebny żeby działało RCALL oraz RET (chociaż w sumie to raczej w SPL i SPH jest przechowywane wiec niby 16 mozna wykorzystac)
+R17 -> LED_PIN (na razie tylko po to, zeby miec jakis mini debugger)
+R18 -> Wykorzystywane w DELAY (mozna użyć, ale nie wraz z delay - bo sie nadpisze)
+R19 -> Wykorzystywane w DELAY (mozna użyć, ale nie wraz z delay - bo sie nadpisze)
+R20 -> Wykorzystywane w DELAY (mozna użyć, ale nie wraz z delay - bo sie nadpisze)
+R21 -> BUTTON_PIN - zmienna przechowujaca wartosc przycisku ktory zostal wcisniety
+R22 ->
+R23 ->
+R24 ->
+R25 ->
+R26 ->
+R27 ->
+R28 ->
+R29 -> Zmienna w funkcji przycisku, obslugujaca delay. poza przyciskiem normalnie dostepna
+R30 -> zmienna pomocnicza w programie, zeby sprawdzac, czy zostal wcisniety dany wybrany przycisk
+R31 -> Jakaś zmienna tymczasowa, sluzaca do nadpisywania -> do uzytku normalnie
