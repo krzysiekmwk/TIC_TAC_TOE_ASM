@@ -8,9 +8,9 @@
 .include "m328pdef.inc"
 
 ;columns PORTC
-.equ COL0 =	0b00000001
-.equ COL1 =	0b00000010
-.equ COL2 =	0b00000100
+.equ COL0 =	0b00000110
+.equ COL1 =	0b00000101
+.equ COL2 =	0b00000011
 ;green rows PORTD
 .equ GROW0=	0b00000001
 .equ GROW1=	0b00000100
@@ -22,9 +22,7 @@
 ;player
 .equ P1 =	0b01000000
 .equ P2 =	0b10000000
----------------------------------------------------------------------------------
-; TODO: ZMIANA STEROWANIA Z JEdyNKI STERUJACEJ NA ZERO STERUJACE DLA COLUMN !!!
----------------------------------------------------------------------------------
+
 ; Replace with your application code
 start:
 	ldi r17, 0b00000111
@@ -54,7 +52,18 @@ displed:
 	;sprawdzanie ktora diode zapalic wtedy
 	;rjmp setdiodeYXC
 	rjmp setdiode00G
+delay:
+	ldi  r21, 41
+    ldi  r19, 150
+    ldi  r20, 128
+L1: dec  r20
+    brne L1
+    dec  r19
+    brne L1
+    dec  r21
+    brne L1
 	
+	rjmp alldiodesoff
 
 ;TODO: USTAWINIE PLAYER I WIERSZA BEZ ZAKLOCANIA SIEBIE NAWZAJEM
 
@@ -65,99 +74,99 @@ setdiode00G:
 	ldi r17, GROW0
 	or r17, r18
 	out PORTD, r17
-	rjmp alldiodesOFF 
+	rjmp delay 
 setdiode00R:
 	ldi r17, COL0
 	out PORTC, r17
 	ldi r17, RROW0
 	out PORTD, r17 
-	rjmp alldiodesOFF
+	rjmp delay
 setdiode01G:
 	ldi r17, COL0	
 	out PORTC, r17
 	ldi r17, GROW1
 	out PORTD, r17
-	rjmp alldiodesOFF 
+	rjmp delay 
 setdiode01R:
 	ldi r17, COL0
 	out PORTC, r17
 	ldi r17, RROW1
 	out PORTD, r17 
-	rjmp alldiodesOFF
+	rjmp delay
 setdiode02G:
 	ldi r17, COL0	
 	out PORTC, r17
 	ldi r17, GROW2
 	out PORTD, r17
-	rjmp alldiodesOFF 
+	rjmp delay 
 setdiode02R:
 	ldi r17, COL0
 	out PORTC, r17
 	ldi r17, RROW2
 	out PORTD, r17 
-	rjmp alldiodesOFF
+	rjmp delay
 setdiode10G:
 	ldi r17, COL1	
 	out PORTC, r17
 	ldi r17, GROW0
 	out PORTD, r17
-	rjmp alldiodesOFF 
+	rjmp delay 
 setdiode10R:
 	ldi r17, COL1
 	out PORTC, r17
 	ldi r17, RROW0
 	out PORTD, r17 
-	rjmp alldiodesOFF
+	rjmp delay
 setdiode11G:
 	ldi r17, COL1	
 	out PORTC, r17
 	ldi r17, GROW1
 	out PORTD, r17
-	rjmp alldiodesOFF 
+	rjmp delay 
 setdiode11R:
 	ldi r17, COL1
 	out PORTC, r17
 	ldi r17, RROW1
 	out PORTD, r17 
-	rjmp alldiodesOFF
+	rjmp delay
 setdiode12G:
 	ldi r17, COL1	
 	out PORTC, r17
 	ldi r17, GROW2
 	out PORTD, r17
-	rjmp alldiodesOFF 
+	rjmp delay 
 setdiode12R:
 	ldi r17, COL1
 	out PORTC, r17
 	ldi r17, RROW2
 	out PORTD, r17 
-	rjmp alldiodesOFF
+	rjmp delay
 setdiode20G:
 	ldi r17, COL2	
 	out PORTC, r17
 	ldi r17, GROW0
 	out PORTD, r17
-	rjmp alldiodesOFF 
+	rjmp delay 
 setdiode21R:
 	ldi r17, COL2
 	out PORTC, r17
 	ldi r17, RROW1
 	out PORTD, r17 
-	rjmp alldiodesOFF
+	rjmp delay
 setdiode22G:
 	ldi r17, COL2	
 	out PORTC, r17
 	ldi r17, GROW2
 	out PORTD, r17
-	rjmp alldiodesOFF 
+	rjmp delay 
 setdiode22R:
 	ldi r17, COL2
 	out PORTC, r17
 	ldi r17, RROW2
 	out PORTD, r17 
-	rjmp alldiodesOFF
+	rjmp delay
 alldiodesOFF:
-	ldi r17, 0x00
+	ldi r17, 0b00000111
 	out PORTC, r17
 	ldi r17, 0b11000000
 	and r17, r18
