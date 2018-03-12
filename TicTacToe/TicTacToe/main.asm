@@ -21,9 +21,9 @@ start:
     RCALL checkButtons
 
 	LDI R30, 0x01
-	CP BUTTON_PIN, R30
-	BREQ delayAndCheckButtonsAgain ; delay
-	backDelay:
+	//CP BUTTON_PIN, R30
+	//BREQ delayAndCheckButtonsAgain ; delay
+	//backDelay:
 
 	CP BUTTON_PIN, R30
 	BREQ zapal
@@ -36,16 +36,11 @@ start:
 
 zapal:
 	SBI PORTD, 7
-	rjmp dalej
+	rjmp zapal
 
 zgas:
 	CBI PORTD, 7
 	rjmp dalej
-
-delayAndCheckButtonsAgain:
-	RCALL delay50ms
-	RCALL checkButtons
-	rjmp backDelay
 
 delay50ms:
 	; ============================= 
@@ -72,51 +67,68 @@ delay50ms:
 ret
 
 checkButtons:
-	NOP
-	LDI R31, 0b00110111
-	OUT PORTB, R31
-	NOP
-	SBIS PINB, 0
-		rjmp pin1
-	SBIS PINB, 1
-		rjmp pin2
-	SBIS PINB, 2
-		rjmp pin3
+	ldi  R29, 0x02
 
-	NOP
-	LDI R31, 0b00101111
-	OUT PORTB, R31
-	NOP
-	SBIS PINB, 0
-		rjmp pin4
-	SBIS PINB, 1
-		rjmp pin5
-	SBIS PINB, 2
-		rjmp pin6
+	buttonLoop:
+		LDI R31, 0b00110111
+		OUT PORTB, R31
+		NOP
+		NOP
+		NOP
+		SBIS PINB, 0
+			rjmp pin1
+		SBIS PINB, 1
+			rjmp pin2
+		SBIS PINB, 2
+			rjmp pin3
 
-	NOP
-	LDI R31, 0b00011111
-	OUT PORTB, R31
-	NOP
-	SBIS PINB, 0
-		rjmp pin7
-	SBIS PINB, 1
-		rjmp pin8
-	SBIS PINB, 2
-		rjmp pin9
+		LDI R31, 0b00101111
+		OUT PORTB, R31
+		NOP
+		NOP
+		NOP
+		SBIS PINB, 0
+			rjmp pin4
+		SBIS PINB, 1
+			rjmp pin5
+		SBIS PINB, 2
+			rjmp pin6
+
+		LDI R31, 0b00011111
+		OUT PORTB, R31
+		NOP
+		NOP
+		NOP
+		SBIS PINB, 0
+			rjmp pin7
+		SBIS PINB, 1
+			rjmp pin8
+		SBIS PINB, 2
+			rjmp pin9
+
+	LDI BUTTON_PIN, 0x00
 ret
+
+decrement:
+	dec R29
+	brne delayAndCheckButtonsAgain
+	ret
+
+delayAndCheckButtonsAgain:
+	RCALL delay50ms
+	rjmp buttonLoop
 
 pin1:
 	LDI BUTTON_PIN, 0x01
-	ret
+	rjmp decrement
 
 pin2:
 	LDI BUTTON_PIN, 0x02
-	ret
+	rjmp decrement
 
 pin3:
 	LDI BUTTON_PIN, 0x03
-	ret
+	rjmp decrement
 
 pin4:
 	LDI BUTTON_PIN, 0x04
@@ -124,20 +136,20 @@ pin4:
 
 pin5:
 	LDI BUTTON_PIN, 0x05
-	ret
+	rjmp decrement
 
 pin6:
 	LDI BUTTON_PIN, 0x06
-	ret
+	rjmp decrement
 
 pin7:
 	LDI BUTTON_PIN, 0x07
-	ret
+	rjmp decrement
 
 pin8:
 	LDI BUTTON_PIN, 0x08
-	ret
+	rjmp decrement
 
 pin9:
 	LDI BUTTON_PIN, 0x09
-	ret
+	rjmp decrement
