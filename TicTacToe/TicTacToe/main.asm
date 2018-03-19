@@ -1,3 +1,19 @@
+;columns PORTC
+.equ COL0 =	0b00000110
+.equ COL1 =	0b00000101
+.equ COL2 =	0b00000011
+;green rows PORTD
+.equ GROW0=	0b00000001
+.equ GROW1=	0b00000100
+.equ GROW2=	0b00010000
+;red rows PORTD
+.equ RROW0=	0b00000010
+.equ RROW1=	0b00001000
+.equ RROW2=	0b00100000
+;player
+.equ P1 =	0b01000000
+.equ P2 =	0b10000000
+
 cli						; wyl¹czenie przerwan
 ldi R16, HIGH(RAMEND)   ; zaladowanie adresu konca pamieci[stala RAMEND - zdefiniowana w pliku](starszej jego czesci) SRAM do R16 
 out SPH, R16            ; zaladowanie zawartosci rejestru R16 do SPH(starszej czesci) rejestru ktory przechowuje tzw. wskaznik konca stosu 
@@ -5,36 +21,85 @@ ldi R16, LOW(RAMEND)    ; zaladowanie (mlodszej czesci) adresu konca pamieci sra
 out SPL, R16			; przepisanie R16 do SPL - rejestru który przechowuje wskaznik konca stosu(mlodszej czesci) 
 
 .DEF BUTTON_PIN = R21		; Miejsce w pamieci na ktory zostal wcisniety
-.DEF LED_PIN = R17			; Rejestr na trzymanie w pamieci diody
 LDI BUTTON_PIN, 0x00		; Przypisanie zera do przycisku - zaden nie zostal wcisniety
-LDI LED_PIN, 0b10000000		; bit diody	(PB5) (Pin 13 ARDU) - sluzy do debugowania
 
 LDI R31, 0b00111000		; PIN 3,4,5 portu B ustawione jako wyjscia
 OUT DDRB, R31			; Przypisanie wartosci do portu
 LDI R31, 0b00111111		; rezystory pull-up na pinie 0,1,2,3,4,5
 OUT PORTB, R31			; Przypisanie wartosci do portu. Sterowanie bêdzie 0
 
-OUT DDRD, LED_PIN		; Ustawienie pinu diody jako wyjscie
+ldi R31, 0b00000111		; Ustawienie portu C jako wyjscia (domyslnie stan 1, ale jako ze kolumna steruje 0, to to sie bedzie pozniej zmieniac)
+out DDRC, R31
+ldi R31, 0xFF			; Caly port D ustawiony jako wyjscie - wszystkie ledy planszy + sygnalizacja gracza
+out DDRD, R31
 
 start:	; Glowna petla programu
     RCALL checkButtons	; Wywolanie funkcji do sprawdzenia przyciskow
 
-	LDI R30, 0x01		; Numer przycisku do porownania (na jego podstawie wlaczy sie dioda)
+	; Taki switch - case troche
+	LDI R30, 0x09		; SWITCH - Numer przycisku do porownania
+	CP BUTTON_PIN, R30	; case BUTTON_PIN == 9
+	BREQ longsetdiode02G	; jesli przycisk == 9 zapal diode 9
+	dec R30				; jesli nie, to nastepuje dekrementacja i kolejne sprawdzenie
+	CP BUTTON_PIN, R30	; case BUTTON_PIN == 8
+	BREQ longsetdiode01G
+	dec R30				
+	CP BUTTON_PIN, R30	; case BUTTON_PIN == 7
+	BREQ longsetdiode00G
+	dec R30				
+	CP BUTTON_PIN, R30	; case BUTTON_PIN == 6
+	BREQ longsetdiode12G
+	dec R30				
+	CP BUTTON_PIN, R30	; case BUTTON_PIN == 5
+	BREQ longsetdiode11G
+	dec R30				
+	CP BUTTON_PIN, R30	; case BUTTON_PIN == 4
+	BREQ longsetdiode10G
+	dec R30				
+	CP BUTTON_PIN, R30	; case BUTTON_PIN == 3
+	BREQ longsetdiode22G
+	dec R30				
+	CP BUTTON_PIN, R30	; case BUTTON_PIN == 2
+	BREQ longsetdiode21G
+	dec R30				
+	CP BUTTON_PIN, R30	; case BUTTON_PIN == 1
+	BREQ longsetdiode20G
+	jmp alldiodesOFF
 
-	CP BUTTON_PIN, R30	; Porownanie przycisku z rejestrem porownawczym
-	BREQ zapal			; Jesli warunek jest spelniony (zmienne sa sobie rowne, to zapal)
-	rjmp zgas			; Jesli warunek nie jest spelniony. Tu mozna byloby uzyc RCALL, ale wyzej niestety nie, przez co nie bylo gdzie wrocic
 	dalej:				; miejsce do powrotu z funcji warunkowych
 
     rjmp start
 
-zapal:
-	SBI PORTD, 7		; Ustawienie na 7 bicie stanu wysokiego (zapalenie diody)
-	rjmp dalej			; powrot do instrukcji (Jesli przycisk jest przytrzymany, to dioda sie swieci ciagle)
 
-zgas:
-	CBI PORTD, 7		; Ustawienie na 7 bicie stanu niskiego (zgaszenie diody)
-	rjmp dalej			; powrot dalej do petli programu
+; BREQ moze skonczyc maksymalnie o 64 instrukcje. RJMP o 2K (w switch bylo za krotko) wiec trzeba wykonac dlugi skok jmp - 4M
+longsetdiode02G:
+	jmp setdiode02G
+longsetdiode01G:
+	jmp setdiode01G
+longsetdiode00G:
+	jmp setdiode00G
+longsetdiode12G:
+	jmp setdiode12G
+longsetdiode11G:
+	jmp setdiode11G
+longsetdiode10G:
+	jmp setdiode10G
+longsetdiode22G:
+	jmp setdiode22G
+longsetdiode21G:
+	jmp setdiode21G
+longsetdiode20G:
+	jmp setdiode20G
+
+setP1:
+	ldi r17, P1
+	out PORTD, r17
+	mov r22, r17 ; przypisanie aktualnego playera
+
+setP2:
+	ldi r17, P2
+	out PORTD, r17
+	mov r22, r17 ; przypisanie aktualnego playera
 
 delay50ms:	; Delay na 50ms. sluzy na debounce przyciskow
 	; ============================= 
@@ -150,3 +215,122 @@ pin8:
 pin9:
 	LDI BUTTON_PIN, 0x09
 	rjmp decrement
+
+
+// Obsluga planszy - ledow. 
+setdiode00G:
+	ldi r17, COL0	
+	out PORTC, r17
+	ldi r17, GROW0
+	or r17, r22
+	out PORTD, r17
+	rjmp dalej 
+setdiode00R:
+	ldi r17, COL0
+	out PORTC, r17
+	ldi r17, RROW0
+	out PORTD, r17 
+	rjmp dalej
+setdiode01G:
+	ldi r17, COL0	
+	out PORTC, r17
+	ldi r17, GROW1
+	out PORTD, r17
+	rjmp dalej 
+setdiode01R:
+	ldi r17, COL0
+	out PORTC, r17
+	ldi r17, RROW1
+	out PORTD, r17 
+	rjmp dalej
+setdiode02G:
+	ldi r17, COL0	
+	out PORTC, r17
+	ldi r17, GROW2
+	out PORTD, r17
+	rjmp dalej 
+setdiode02R:
+	ldi r17, COL0
+	out PORTC, r17
+	ldi r17, RROW2
+	out PORTD, r17 
+	rjmp dalej
+setdiode10G:
+	ldi r17, COL1	
+	out PORTC, r17
+	ldi r17, GROW0
+	out PORTD, r17
+	rjmp dalej 
+setdiode10R:
+	ldi r17, COL1
+	out PORTC, r17
+	ldi r17, RROW0
+	out PORTD, r17 
+	rjmp dalej
+setdiode11G:
+	ldi r17, COL1	
+	out PORTC, r17
+	ldi r17, GROW1
+	out PORTD, r17
+	rjmp dalej 
+setdiode11R:
+	ldi r17, COL1
+	out PORTC, r17
+	ldi r17, RROW1
+	out PORTD, r17 
+	rjmp dalej
+setdiode12G:
+	ldi r17, COL1	
+	out PORTC, r17
+	ldi r17, GROW2
+	out PORTD, r17
+	rjmp dalej 
+setdiode12R:
+	ldi r17, COL1
+	out PORTC, r17
+	ldi r17, RROW2
+	out PORTD, r17 
+	rjmp dalej
+setdiode20G:
+	ldi r17, COL2	
+	out PORTC, r17
+	ldi r17, GROW0
+	out PORTD, r17
+	rjmp dalej
+setdiode20R:
+	ldi r17, COL2	
+	out PORTC, r17
+	ldi r17, RROW0
+	out PORTD, r17
+	rjmp dalej 
+setdiode21G:
+	ldi r17, COL2
+	out PORTC, r17
+	ldi r17, GROW1
+	out PORTD, r17 
+	rjmp dalej
+setdiode21R:
+	ldi r17, COL2
+	out PORTC, r17
+	ldi r17, RROW1
+	out PORTD, r17 
+	rjmp dalej
+setdiode22G:
+	ldi r17, COL2	
+	out PORTC, r17
+	ldi r17, GROW2
+	out PORTD, r17
+	rjmp dalej 
+setdiode22R:
+	ldi r17, COL2
+	out PORTC, r17
+	ldi r17, RROW2
+	out PORTD, r17 
+	rjmp dalej
+alldiodesOFF:
+	ldi r17, 0b00000111
+	out PORTC, r17
+	ldi r17, 0b11000000
+	and r17, r18
+	out PORTD, r17 
+	rjmp dalej
