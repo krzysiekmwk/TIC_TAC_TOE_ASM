@@ -34,6 +34,8 @@ ldi R31, 0xFF			; Caly port D ustawiony jako wyjscie - wszystkie ledy planszy + 
 out DDRD, R31
 
 start:	; Glowna petla programu
+	RCALL setP1
+
     RCALL checkButtons	; Wywolanie funkcji do sprawdzenia przyciskow
 
 	; Taki switch - case troche
@@ -93,13 +95,15 @@ longsetdiode20G:
 
 setP1:
 	ldi r17, P1
-	out PORTD, r17
+	//out PORTD, r17
 	mov r22, r17 ; przypisanie aktualnego playera
+	ret
 
 setP2:
 	ldi r17, P2
-	out PORTD, r17
+	//out PORTD, r17
 	mov r22, r17 ; przypisanie aktualnego playera
+	ret
 
 delay50ms:	; Delay na 50ms. sluzy na debounce przyciskow
 	; ============================= 
@@ -229,108 +233,125 @@ setdiode00R:
 	ldi r17, COL0
 	out PORTC, r17
 	ldi r17, RROW0
+	or r17, r22
 	out PORTD, r17 
 	rjmp dalej
 setdiode01G:
 	ldi r17, COL0	
 	out PORTC, r17
 	ldi r17, GROW1
+	or r17, r22
 	out PORTD, r17
 	rjmp dalej 
 setdiode01R:
 	ldi r17, COL0
 	out PORTC, r17
 	ldi r17, RROW1
+	or r17, r22
 	out PORTD, r17 
 	rjmp dalej
 setdiode02G:
 	ldi r17, COL0	
 	out PORTC, r17
 	ldi r17, GROW2
+	or r17, r22
 	out PORTD, r17
 	rjmp dalej 
 setdiode02R:
 	ldi r17, COL0
 	out PORTC, r17
 	ldi r17, RROW2
+	or r17, r22
 	out PORTD, r17 
 	rjmp dalej
 setdiode10G:
 	ldi r17, COL1	
 	out PORTC, r17
 	ldi r17, GROW0
+	or r17, r22
 	out PORTD, r17
 	rjmp dalej 
 setdiode10R:
 	ldi r17, COL1
 	out PORTC, r17
 	ldi r17, RROW0
+	or r17, r22
 	out PORTD, r17 
 	rjmp dalej
 setdiode11G:
 	ldi r17, COL1	
 	out PORTC, r17
 	ldi r17, GROW1
+	or r17, r22
 	out PORTD, r17
 	rjmp dalej 
 setdiode11R:
 	ldi r17, COL1
 	out PORTC, r17
 	ldi r17, RROW1
+	or r17, r22
 	out PORTD, r17 
 	rjmp dalej
 setdiode12G:
 	ldi r17, COL1	
 	out PORTC, r17
 	ldi r17, GROW2
+	or r17, r22
 	out PORTD, r17
 	rjmp dalej 
 setdiode12R:
 	ldi r17, COL1
 	out PORTC, r17
 	ldi r17, RROW2
+	or r17, r22
 	out PORTD, r17 
 	rjmp dalej
 setdiode20G:
 	ldi r17, COL2	
 	out PORTC, r17
 	ldi r17, GROW0
+	or r17, r22
 	out PORTD, r17
 	rjmp dalej
 setdiode20R:
 	ldi r17, COL2	
 	out PORTC, r17
 	ldi r17, RROW0
+	or r17, r22
 	out PORTD, r17
 	rjmp dalej 
 setdiode21G:
 	ldi r17, COL2
 	out PORTC, r17
 	ldi r17, GROW1
+	or r17, r22
 	out PORTD, r17 
 	rjmp dalej
 setdiode21R:
 	ldi r17, COL2
 	out PORTC, r17
 	ldi r17, RROW1
+	or r17, r22
 	out PORTD, r17 
 	rjmp dalej
 setdiode22G:
 	ldi r17, COL2	
 	out PORTC, r17
 	ldi r17, GROW2
+	or r17, r22
 	out PORTD, r17
 	rjmp dalej 
 setdiode22R:
 	ldi r17, COL2
 	out PORTC, r17
 	ldi r17, RROW2
+	or r17, r22
 	out PORTD, r17 
 	rjmp dalej
 alldiodesOFF:
 	ldi r17, 0b00000111
 	out PORTC, r17
 	ldi r17, 0b11000000
-	and r17, r18
+	and r17, r22
 	out PORTD, r17 
 	rjmp dalej
