@@ -51,8 +51,9 @@ displed:
 
 	;sprawdzanie ktora diode zapalic wtedy
 	;rjmp setdiodeYXC
-	rjmp setdiode22R
-
+	sbis PORTD, 6
+	rjmp setdiode01G
+	rjmp setdiode11R
 delay:
 	ldi  r21, 41
     ldi  r19, 150
@@ -63,8 +64,9 @@ L1: dec  r20
     brne L1
     dec  r21
     brne L1
+	
 	//rjmp alldiodesoff
-	rjmp displed
++	rjmp displed
 
 ;TODO: USTAWINIE PLAYER I WIERSZA BEZ ZAKLOCANIA SIEBIE NAWZAJEM
 
@@ -80,102 +82,119 @@ setdiode00R:
 	ldi r17, COL0
 	out PORTC, r17
 	ldi r17, RROW0
+	or r17, r18
 	out PORTD, r17 
 	rjmp delay
 setdiode01G:
 	ldi r17, COL0	
 	out PORTC, r17
 	ldi r17, GROW1
+	or r17, r18
 	out PORTD, r17
 	rjmp delay 
 setdiode01R:
 	ldi r17, COL0
 	out PORTC, r17
 	ldi r17, RROW1
+	or r17, r18
 	out PORTD, r17 
 	rjmp delay
 setdiode02G:
 	ldi r17, COL0	
 	out PORTC, r17
 	ldi r17, GROW2
+	or r17, r18
 	out PORTD, r17
 	rjmp delay 
 setdiode02R:
 	ldi r17, COL0
 	out PORTC, r17
 	ldi r17, RROW2
+	or r17, r18
 	out PORTD, r17 
 	rjmp delay
 setdiode10G:
 	ldi r17, COL1	
 	out PORTC, r17
 	ldi r17, GROW0
+	or r17, r18
 	out PORTD, r17
 	rjmp delay 
 setdiode10R:
 	ldi r17, COL1
 	out PORTC, r17
 	ldi r17, RROW0
+	or r17, r18
 	out PORTD, r17 
 	rjmp delay
 setdiode11G:
 	ldi r17, COL1	
 	out PORTC, r17
 	ldi r17, GROW1
+	or r17, r18
 	out PORTD, r17
 	rjmp delay 
 setdiode11R:
 	ldi r17, COL1
 	out PORTC, r17
 	ldi r17, RROW1
+	or r17, r18
 	out PORTD, r17 
 	rjmp delay
 setdiode12G:
 	ldi r17, COL1	
 	out PORTC, r17
 	ldi r17, GROW2
+	or r17, r18
 	out PORTD, r17
 	rjmp delay 
 setdiode12R:
 	ldi r17, COL1
 	out PORTC, r17
 	ldi r17, RROW2
+	or r17, r18
 	out PORTD, r17 
 	rjmp delay
 setdiode20G:
 	ldi r17, COL2	
 	out PORTC, r17
 	ldi r17, GROW0
+	or r17, r18
 	out PORTD, r17
 	rjmp delay
 setdiode20R:
 	ldi r17, COL2	
 	out PORTC, r17
 	ldi r17, RROW0
+	or r17, r18
 	out PORTD, r17
-	rjmp delay 
+ 	rjmp delay 
 setdiode21G:
 	ldi r17, COL2
 	out PORTC, r17
 	ldi r17, GROW1
+	or r17, r18
 	out PORTD, r17 
-	rjmp delay
+	rjmp delay 
 setdiode21R:
 	ldi r17, COL2
 	out PORTC, r17
 	ldi r17, RROW1
+	or r17, r18
 	out PORTD, r17 
 	rjmp delay
 setdiode22G:
 	ldi r17, COL2	
 	out PORTC, r17
 	ldi r17, GROW2
+	or r17, r18
 	out PORTD, r17
 	rjmp delay 
 setdiode22R:
 	ldi r17, COL2
 	out PORTC, r17
 	ldi r17, RROW2
+	or r17, r18
 	out PORTD, r17 
 	rjmp delay
 alldiodesOFF:
