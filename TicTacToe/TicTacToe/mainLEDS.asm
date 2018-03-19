@@ -51,7 +51,8 @@ displed:
 
 	;sprawdzanie ktora diode zapalic wtedy
 	;rjmp setdiodeYXC
-	rjmp setdiode00G
+	rjmp setdiode22R
+
 delay:
 	ldi  r21, 41
     ldi  r19, 150
@@ -62,8 +63,8 @@ L1: dec  r20
     brne L1
     dec  r21
     brne L1
-	
-	rjmp alldiodesoff
+	//rjmp alldiodesoff
+	rjmp displed
 
 ;TODO: USTAWINIE PLAYER I WIERSZA BEZ ZAKLOCANIA SIEBIE NAWZAJEM
 
@@ -146,7 +147,19 @@ setdiode20G:
 	out PORTC, r17
 	ldi r17, GROW0
 	out PORTD, r17
+	rjmp delay
+setdiode20R:
+	ldi r17, COL2	
+	out PORTC, r17
+	ldi r17, RROW0
+	out PORTD, r17
 	rjmp delay 
+setdiode21G:
+	ldi r17, COL2
+	out PORTC, r17
+	ldi r17, GROW1
+	out PORTD, r17 
+	rjmp delay
 setdiode21R:
 	ldi r17, COL2
 	out PORTC, r17
