@@ -5,9 +5,9 @@ R19 -> Wykorzystywane w DELAY (mozna użyć, ale nie wraz z delay - bo sie nadpi
 R20 -> Wykorzystywane w DELAY (mozna użyć, ale nie wraz z delay - bo sie nadpisze)
 R21 -> BUTTON_PIN - zmienna przechowujaca wartosc przycisku ktory zostal wcisniety
 R22 -> aktualny player
-R23 ->
-R24 ->
-R25 ->
+R23 -> Diody playera1 od 0 do 7
+R24 -> Diody playera2 od 0 do 7
+R25 -> ostatnie diody P1 i P2 0b000000{P2}{P1}
 R26 ->
 R27 ->
 R28 ->
