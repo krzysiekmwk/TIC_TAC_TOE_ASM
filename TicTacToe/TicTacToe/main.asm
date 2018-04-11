@@ -1,3 +1,8 @@
+.ORG 0x0000 rjmp SETUP
+.ORG 0x001C rjmp MULTIP_LED
+
+SETUP:
+
 ;columns PORTC
 .equ COL0 =	0b00000110
 .equ COL1 =	0b00000101
@@ -33,10 +38,37 @@ out DDRC, R31
 ldi R31, 0xFF			; Caly port D ustawiony jako wyjscie - wszystkie ledy planszy + sygnalizacja gracza
 out DDRD, R31
 
+; Ustawienie przerwan
+; Diody zeby mrugaly z czestotliwoscia 30Hz, to 30*18 daje 540Hz - co tyle sie bedzie uruchamialo przerwanie
+; 16MHz / 1024 / 540 = 29 -> taka wartoscia sie powinno ladowac OCR0
+LDI R31, 0b00000010		; Ustawienie tryby CTC
+LDI R17, TCCR0A
+OR R17, R31
+OUT TCCR0A, R17
+LDI R31, 0b00000101		; Ustawienie preskalera na 1024
+LDI R17, TCCR0B
+OR R17, R31
+OUT TCCR0B, R17
+LDI R31, 0b00000110		; Ustawienie compare match do porownan
+LDI R17, TIMSK0
+OR R17, R31
+STS TIMSK0, R17
+//LDI R31, 0x1D			; Ustawienie OCR0
+LDI R31, 0x27			; Ustawienie OCR0
+OUT OCR0A, R31
+OUT OCR0B, R31
+OUT TCNT0, R31
+
+SEI		; Odblokowanie przerwan
+
+LDI R28, 0x01
+
+; Skok w trakcie przerwania do multipleksowania diody
+
 start:	; Glowna petla programu
 	RCALL setP1
 
-    RCALL checkButtons	; Wywolanie funkcji do sprawdzenia przyciskow
+    /*RCALL checkButtons	; Wywolanie funkcji do sprawdzenia przyciskow
 
 	; Taki switch - case troche
 	LDI R30, 0x09		; SWITCH - Numer przycisku do porownania
@@ -66,19 +98,32 @@ start:	; Glowna petla programu
 	dec R30				
 	CP BUTTON_PIN, R30	; case BUTTON_PIN == 1
 	BREQ longsetdiode20G
-	jmp alldiodesOFF
-
-	dalej:				; miejsce do powrotu z funcji warunkowych
+	//jmp alldiodesOFF
+	*/
+	//dalej:				; miejsce do powrotu z funcji warunkowych
 
     rjmp start
 
+MULTIP_LED:
+	call alldiodesOFF
+	
+	LDI R30, 0x01		; do porownania czy 1 czy 0
+	CP R28, R30
+	BREQ longsetdiode00G
+	//jmp longsetdiode01G
+
+	dalej:
+
+	reti
 
 ; BREQ moze skonczyc maksymalnie o 64 instrukcje. RJMP o 2K (w switch bylo za krotko) wiec trzeba wykonac dlugi skok jmp - 4M
 longsetdiode02G:
 	jmp setdiode02G
 longsetdiode01G:
+	LDI R28, 0x01
 	jmp setdiode01G
 longsetdiode00G:
+	LDI R28, 0x00
 	jmp setdiode00G
 longsetdiode12G:
 	jmp setdiode12G
@@ -92,6 +137,9 @@ longsetdiode21G:
 	jmp setdiode21G
 longsetdiode20G:
 	jmp setdiode20G
+longalldiodesOFF:
+	LDI R28, 0x01
+	jmp alldiodesOFF
 
 setP1:
 	ldi r17, P1
@@ -229,20 +277,23 @@ setdiode00G:
 	or r17, r22
 	out PORTD, r17
 	rjmp dalej 
+	//reti
 setdiode00R:
 	ldi r17, COL0
 	out PORTC, r17
 	ldi r17, RROW0
 	or r17, r22
 	out PORTD, r17 
-	rjmp dalej
+	//rjmp dalej
+	reti
 setdiode01G:
 	ldi r17, COL0	
 	out PORTC, r17
 	ldi r17, GROW1
 	or r17, r22
 	out PORTD, r17
-	rjmp dalej 
+	//rjmp dalej
+	reti
 setdiode01R:
 	ldi r17, COL0
 	out PORTC, r17
@@ -256,7 +307,8 @@ setdiode02G:
 	ldi r17, GROW2
 	or r17, r22
 	out PORTD, r17
-	rjmp dalej 
+	//rjmp dalej
+	reti
 setdiode02R:
 	ldi r17, COL0
 	out PORTC, r17
@@ -270,7 +322,8 @@ setdiode10G:
 	ldi r17, GROW0
 	or r17, r22
 	out PORTD, r17
-	rjmp dalej 
+	//rjmp dalej 
+	reti
 setdiode10R:
 	ldi r17, COL1
 	out PORTC, r17
@@ -354,4 +407,5 @@ alldiodesOFF:
 	ldi r17, 0b11000000
 	and r17, r22
 	out PORTD, r17 
-	rjmp dalej
+	//rjmp dalej
+	ret
