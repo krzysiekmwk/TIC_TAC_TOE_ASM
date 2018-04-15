@@ -41,7 +41,7 @@ out DDRD, R31
 ; Ustawienie przerwan
 ; Diody zeby mrugaly z czestotliwoscia 30Hz, to 30*18 daje 540Hz - co tyle sie bedzie uruchamialo przerwanie
 ; 16MHz / 1024 / 540 = 29 -> taka wartoscia sie powinno ladowac OCR0
-LDI R31, 0b0000010		; Ustawienie tryby CTC przerwan -> reset zegara co przepelnienie porownujac do wartosci OCR
+LDI R31, 0b00000010		; Ustawienie tryby CTC przerwan -> reset zegara co przepelnienie porownujac do wartosci OCR
 OUT TCCR0A, R31
 LDI R31, 0b00000101		; Ustawienie preskalera na 1024
 OUT TCCR0B, R31
