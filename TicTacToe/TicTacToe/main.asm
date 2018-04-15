@@ -41,27 +41,18 @@ out DDRD, R31
 ; Ustawienie przerwan
 ; Diody zeby mrugaly z czestotliwoscia 30Hz, to 30*18 daje 540Hz - co tyle sie bedzie uruchamialo przerwanie
 ; 16MHz / 1024 / 540 = 29 -> taka wartoscia sie powinno ladowac OCR0
-LDI R31, 0b00000010		; Ustawienie tryby CTC
-LDI R17, TCCR0A
-OR R17, R31
-OUT TCCR0A, R17
+LDI R31, 0b0000010		; Ustawienie tryby CTC przerwan -> reset zegara co przepelnienie porownujac do wartosci OCR
+OUT TCCR0A, R31
 LDI R31, 0b00000101		; Ustawienie preskalera na 1024
-LDI R17, TCCR0B
-OR R17, R31
-OUT TCCR0B, R17
-LDI R31, 0b00000110		; Ustawienie compare match do porownan
-LDI R17, TIMSK0
-OR R17, R31
-STS TIMSK0, R17
-//LDI R31, 0x1D			; Ustawienie OCR0
-LDI R31, 0x27			; Ustawienie OCR0
+OUT TCCR0B, R31
+LDI R31, 0b00000010		; Ustawienie compare match do porownan z OCR0A
+STS TIMSK0, R31
+LDI R31, 29				; Ustawienie OCR0
 OUT OCR0A, R31
-OUT OCR0B, R31
-OUT TCNT0, R31
 
-SEI		; Odblokowanie przerwan
 
 LDI R28, 0x01
+SEI		; Odblokowanie przerwan
 
 ; Skok w trakcie przerwania do multipleksowania diody
 
@@ -105,14 +96,23 @@ start:	; Glowna petla programu
     rjmp start
 
 MULTIP_LED:
-	call alldiodesOFF
+	//POP R28
+	//push R16
+	//in R16,SREG
+	//push R16
+	rcall alldiodesOFF
 	
 	LDI R30, 0x01		; do porownania czy 1 czy 0
 	CP R28, R30
 	BREQ longsetdiode00G
-	//jmp longsetdiode01G
+	jmp longsetdiode01G
 
 	dalej:
+
+	//pop R16	
+	//out SREG, R16
+	//pop R16
+	//PUSH R28
 
 	reti
 
@@ -292,8 +292,8 @@ setdiode01G:
 	ldi r17, GROW1
 	or r17, r22
 	out PORTD, r17
-	//rjmp dalej
-	reti
+	rjmp dalej
+	//reti
 setdiode01R:
 	ldi r17, COL0
 	out PORTC, r17
