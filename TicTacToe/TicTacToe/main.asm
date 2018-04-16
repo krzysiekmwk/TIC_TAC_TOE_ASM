@@ -19,6 +19,9 @@ SETUP:
 .equ P1 =	0b01000000
 .equ P2 =	0b10000000
 
+.DEF LED_NUMBER = R16	; Miejsce w pamieci na diode ktora ma sie zapalic
+LDI LED_NUMBER, 0x09
+
 cli						; wyl¹czenie przerwan
 ldi R16, HIGH(RAMEND)   ; zaladowanie adresu konca pamieci[stala RAMEND - zdefiniowana w pliku](starszej jego czesci) SRAM do R16 
 out SPH, R16            ; zaladowanie zawartosci rejestru R16 do SPH(starszej czesci) rejestru ktory przechowuje tzw. wskaznik konca stosu 
@@ -43,18 +46,16 @@ out DDRD, R31
 ; 16MHz / 1024 / 540 = 29 -> taka wartoscia sie powinno ladowac OCR0
 LDI R31, 0b00000010		; Ustawienie tryby CTC przerwan -> reset zegara co przepelnienie porownujac do wartosci OCR
 OUT TCCR0A, R31
-LDI R31, 0b00000011		; Ustawienie preskalera na 1024
+LDI R31, 0b00000101		; Ustawienie preskalera na 1024
 OUT TCCR0B, R31
 LDI R31, 0b00000010		; Ustawienie compare match do porownan z OCR0A
 STS TIMSK0, R31
-LDI R31, 1				; Ustawienie OCR0
+LDI R31, 29				; Ustawienie OCR0
 OUT OCR0A, R31
 
-.DEF LED_NUMBER = R28	; Miejsce w pamieci na diode ktora ma sie zapalic
-LDI LED_NUMBER, 0x09
-LDI R23, 0b10101010
-LDI R24, 0b01010101
-LDI R25, 0b00000001
+LDI R23, 0b10000000
+LDI R24, 0b00010001
+LDI R25, 0b00000010
 SEI		; Odblokowanie przerwan
 
 start:	; Glowna petla programu
@@ -98,13 +99,8 @@ start:	; Glowna petla programu
 
 MULTIP_LED:
 	rcall alldiodesOFF
-	
-	/*LDI R30, 0x01		; do porownania czy 1 czy 0
-	CP R28, R30
-	BREQ longsetdiode00G
-	jmp longsetdiode01G*/
 
-	; Taki switch - case troche
+	;switch - case
 	LDI R27, 0x09		; SWITCH - Numer diody do porownania
 	CP LED_NUMBER, R27	; case LED_NUMBER == 9
 	BREQ longCheckDiode9	; jesli nr diody == 9 zapal diode 9
@@ -142,7 +138,7 @@ MULTIP_LED:
 	BREQ longCheckDiode1
 	backDiode1:
 
-	LDI R28, 0x09
+	LDI LED_NUMBER, 0x09
 
 	reti
 
@@ -167,192 +163,174 @@ longCheckDiode1:
 	jmp checkDiode1
 
 checkDiode9:
-	LDI R31, 0b00000001
-	LDI R16, 0b00000001
-	AND R31, R25
-	CP R31, R16
-	BREQ longsetdiode02G
-	LDI R31, 0b00000010
-	LDI R16, 0b00000010
-	AND R31, R25
-	CP R31, R16
-	BREQ longsetdiode02R
-	LDI R28, 0x08
-	jmp backDiode9
+	LDI R28, 0b00000001		; to czy dana dioda ma sie zapalic jest zakodowane w rejestrach R23 R24 oraz R25
+	AND R28, R25			; AND sprawdza czy na danym bicie jest jeden czy nie
+	TST R28					; Ustawia flage, sprawdzajac czy AND jest zerem
+	BRNE longsetdiode02G	; Jesli nie jest zerem, to zaswiec diode
+	LDI R28, 0b00000010		; Jesli jest to idzie i sprawdza dalej
+	AND R28, R25
+	TST R28
+	BRNE longsetdiode02R
+	LDI LED_NUMBER, 0x08	; Jesli zadna dioda sie nie zapalila, to zmniejsza index numeru diody do zaswiecenia
+	jmp backDiode9			; wraca do petli instrukcji switch case - do srodka
 
 longsetdiode02R:
-	LDI R28, 0x08
-	jmp setdiode02R
+	LDI LED_NUMBER, 0x08	; Zmniejsza index numeru diody do zaswiecenia
+	jmp setdiode02R			; Zapala dana diode
 longsetdiode02G:
-	LDI R28, 0x08
+	LDI LED_NUMBER, 0x08
 	jmp setdiode02G
 
 checkDiode8:
-	LDI R31, 0b10000000
-	LDI R16, 0b10000000
-	AND R31, R23
-	CP R31, R16
-	BREQ longsetdiode01G
-	LDI R31, 0b10000000
-	LDI R16, 0b10000000
-	AND R31, R24
-	CP R31, R16
-	BREQ longsetdiode01R
-	LDI R28, 0x07
+	LDI R28, 0b10000000
+	AND R28, R23
+	TST R28
+	BRNE longsetdiode01G
+	LDI R28, 0b10000000
+	AND R28, R24
+	TST R28
+	BRNE longsetdiode01R
+	LDI LED_NUMBER, 0x07
 	jmp backDiode8
 
 longsetdiode01R:
-	LDI R28, 0x07
+	LDI LED_NUMBER, 0x07
 	jmp setdiode01R
 longsetdiode01G:
-	LDI R28, 0x07
+	LDI LED_NUMBER, 0x07
 	jmp setdiode01G
 
 checkDiode7:
-	LDI R31, 0b01000000
-	LDI R16, 0b01000000
-	AND R31, R23
-	CP R31, R16
-	BREQ longsetdiode00G
-	LDI R31, 0b01000000
-	LDI R16, 0b01000000
-	AND R31, R24
-	CP R31, R16
-	BREQ longsetdiode00R
-	LDI R28, 0x06
+	LDI R28, 0b01000000
+	AND R28, R23
+	TST R28
+	BRNE longsetdiode00G
+	LDI R28, 0b01000000
+	AND R28, R24
+	TST R28
+	BRNE longsetdiode00R
+	LDI LED_NUMBER, 0x06
 	jmp backDiode7
 
 longsetdiode00R:
-	LDI R28, 0x06
+	LDI LED_NUMBER, 0x06
 	jmp setdiode00R
 longsetdiode00G:
-	LDI R28, 0x06
+	LDI LED_NUMBER, 0x06
 	jmp setdiode00G
 
 checkDiode6:
-	LDI R31, 0b00100000
-	LDI R16, 0b00100000
-	AND R31, R23
-	CP R31, R16
-	BREQ longsetdiode12G
-	LDI R31, 0b00100000
-	LDI R16, 0b00100000
-	AND R31, R24
-	CP R31, R16
-	BREQ longsetdiode12R
-	LDI R28, 0x05
+	LDI R28, 0b00100000
+	AND R28, R23
+	TST R28
+	BRNE longsetdiode12G
+	LDI R28, 0b00100000
+	AND R28, R24
+	TST R28
+	BRNE longsetdiode12R
+	LDI LED_NUMBER, 0x05
 	jmp backDiode6
 
 longsetdiode12R:
-	LDI R28, 0x05
+	LDI LED_NUMBER, 0x05
 	jmp setdiode12R
 longsetdiode12G:
-	LDI R28, 0x05
+	LDI LED_NUMBER, 0x05
 	jmp setdiode12G
 
 checkDiode5:
-	LDI R31, 0b00010000
-	LDI R16, 0b00010000
-	AND R31, R23
-	CP R31, R16
-	BREQ longsetdiode11G
-	LDI R31, 0b00010000
-	LDI R16, 0b00010000
-	AND R31, R24
-	CP R31, R16
-	BREQ longsetdiode11R
-	LDI R28, 0x04
+	LDI R28, 0b00010000
+	AND R28, R23
+	TST R28
+	BRNE longsetdiode11G
+	LDI R28, 0b00010000
+	AND R28, R24
+	TST R28
+	BRNE longsetdiode11R
+	LDI LED_NUMBER, 0x04
 	jmp backDiode5
 
 longsetdiode11R:
-	LDI R28, 0x04
+	LDI LED_NUMBER, 0x04
 	jmp setdiode11R
 longsetdiode11G:
-	LDI R28, 0x04
+	LDI LED_NUMBER, 0x04
 	jmp setdiode11G
 
 checkDiode4:
-	LDI R31, 0b00001000
-	LDI R16, 0b00001000
-	AND R31, R23
-	CP R31, R16
-	BREQ longsetdiode10G
-	LDI R31, 0b00001000
-	LDI R16, 0b00001000
-	AND R31, R24
-	CP R31, R16
-	BREQ longsetdiode10R
-	LDI R28, 0x03
+	LDI R28, 0b00001000
+	AND R28, R23
+	TST R28
+	BRNE longsetdiode10G
+	LDI R28, 0b00001000
+	AND R28, R24
+	TST R28
+	BRNE longsetdiode10R
+	LDI LED_NUMBER, 0x03
 	jmp backDiode4
 
 longsetdiode10R:
-	LDI R28, 0x03
+	LDI LED_NUMBER, 0x03
 	jmp setdiode10R
 longsetdiode10G:
-	LDI R28, 0x03
+	LDI LED_NUMBER, 0x03
 	jmp setdiode10G
 
 checkDiode3:
-	LDI R31, 0b00000100
-	LDI R16, 0b00000100
-	AND R31, R23
-	CP R31, R16
-	BREQ longsetdiode22G
-	LDI R31, 0b00000100
-	LDI R16, 0b00000100
-	AND R31, R24
-	CP R31, R16
-	BREQ longsetdiode22R
-	LDI R28, 0x02
+	LDI R28, 0b00000100
+	AND R28, R23
+	TST R28
+	BRNE longsetdiode22G
+	LDI R28, 0b00000100
+	AND R28, R24
+	TST R28
+	BRNE longsetdiode22R
+	LDI LED_NUMBER, 0x02
 	jmp backDiode3
 
 longsetdiode22R:
-	LDI R28, 0x02
+	LDI LED_NUMBER, 0x02
 	jmp setdiode22R
 longsetdiode22G:
-	LDI R28, 0x02
+	LDI LED_NUMBER, 0x02
 	jmp setdiode22G
 
 checkDiode2:
-	LDI R31, 0b00000010
-	LDI R16, 0b00000010
-	AND R31, R23
-	CP R31, R16
-	BREQ longsetdiode21G
-	LDI R31, 0b00000010
-	LDI R16, 0b00000010
-	AND R31, R24
-	CP R31, R16
-	BREQ longsetdiode21R
-	LDI R28, 0x01
+	LDI R28, 0b00000010
+	AND R28, R23
+	TST R28
+	BRNE longsetdiode21G
+	LDI R28, 0b00000010
+	AND R28, R24
+	TST R28
+	BRNE longsetdiode21R
+	LDI LED_NUMBER, 0x01
 	jmp backDiode2
 
 longsetdiode21R:
-	LDI R28, 0x01
+	LDI LED_NUMBER, 0x01
 	jmp setdiode21R
 longsetdiode21G:
-	LDI R28, 0x01
+	LDI LED_NUMBER, 0x01
 	jmp setdiode21G
 
 checkDiode1:
-	LDI R31, 0b00000001
-	LDI R16, 0b00000001
-	AND R31, R23
-	CP R31, R16
-	BREQ longsetdiode20G
-	LDI R31, 0b00000001
-	LDI R16, 0b00000001
-	AND R31, R24
-	CP R31, R16
-	BREQ longsetdiode20R
-	LDI R28, 0x00
+	LDI R28, 0b00000001
+	AND R28, R23
+	TST R28
+	BRNE longsetdiode20G
+	LDI R28, 0b00000001
+	AND R28, R24
+	TST R28
+	BRNE longsetdiode20R
+	LDI LED_NUMBER, 0x00
 	jmp backDiode1
 
 longsetdiode20R:
-	LDI R28, 0x00
+	LDI LED_NUMBER, 0x00
 	jmp setdiode20R
 longsetdiode20G:
-	LDI R28, 0x00
+	LDI LED_NUMBER, 0x00
 	jmp setdiode20G
 
 setP1:
@@ -485,12 +463,12 @@ pin9:
 
 // Obsluga planszy - ledow. 
 setdiode00G:
-	ldi r17, COL0	
+	ldi r17, COL0	; Wpisanie odpowiedniej kolumny i wiersza
 	out PORTC, r17
 	ldi r17, GROW0
-	or r17, r22
+	or r17, r22		; Dopisanie aktualnego playera
 	out PORTD, r17
-	reti
+	reti			; Powrot z przerwania
 setdiode00R:
 	ldi r17, COL0
 	out PORTC, r17
@@ -610,7 +588,7 @@ setdiode22R:
 	or r17, r22
 	out PORTD, r17 
 	reti
-alldiodesOFF:
+alldiodesOFF:			; Wywolywane w przerwaniu jako funkcja przez RCALL, dlatego wraca przez instrukcje RET.
 	ldi r17, 0b00000111
 	out PORTC, r17
 	ldi r17, 0b11000000
