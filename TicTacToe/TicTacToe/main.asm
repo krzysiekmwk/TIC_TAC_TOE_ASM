@@ -1,5 +1,5 @@
 .ORG 0x0000 rjmp SETUP
-.ORG 0x001C rjmp MULTIP_LED
+.ORG 0x001C rjmp MULTIP_LED ; Skok w trakcie przerwania do multipleksowania diody
 
 SETUP:
 
@@ -50,11 +50,12 @@ STS TIMSK0, R31
 LDI R31, 29				; Ustawienie OCR0
 OUT OCR0A, R31
 
-
-LDI R28, 0x01
+.DEF LED_NUMBER = R28	; Miejsce w pamieci na diode ktora ma sie zapalic
+LDI LED_NUMBER, 0x09
+LDI R23, 0b10101010
+LDI R24, 0b01010101
+LDI R25, 0b00000001
 SEI		; Odblokowanie przerwan
-
-; Skok w trakcie przerwania do multipleksowania diody
 
 start:	; Glowna petla programu
 	RCALL setP1
@@ -96,34 +97,70 @@ start:	; Glowna petla programu
     rjmp start
 
 MULTIP_LED:
-	//POP R28
-	//push R16
-	//in R16,SREG
-	//push R16
 	rcall alldiodesOFF
 	
-	LDI R30, 0x01		; do porownania czy 1 czy 0
+	/*LDI R30, 0x01		; do porownania czy 1 czy 0
 	CP R28, R30
 	BREQ longsetdiode00G
-	jmp longsetdiode01G
+	jmp longsetdiode01G*/
 
+	; Taki switch - case troche
+	LDI R27, 0x09		; SWITCH - Numer diody do porownania
+	CP LED_NUMBER, R27	; case LED_NUMBER == 9
+	BREQ longCheckDiode9	; jesli nr diody == 9 zapal diode 9
+	backDiode9:
+	/*dec R27				; jesli nie, to nastepuje dekrementacja i kolejne sprawdzenie
+	CP LED_NUMBER, R27	; case LED_NUMBER == 8
+	BREQ longsetdiode01G
+	dec R27				
+	CP LED_NUMBER, R27	; case LED_NUMBER == 7
+	BREQ longsetdiode00G
+	dec R27				
+	CP LED_NUMBER, R27	; case LED_NUMBER == 6
+	BREQ longsetdiode12G
+	dec R27				
+	CP LED_NUMBER, R27	; case LED_NUMBER == 5
+	BREQ longsetdiode11G
+	dec R27				
+	CP LED_NUMBER, R27	; case LED_NUMBER == 4
+	BREQ longsetdiode10G
+	dec R27				
+	CP LED_NUMBER, R27	; case LED_NUMBER == 3
+	BREQ longsetdiode22G
+	dec R27				
+	CP LED_NUMBER, R27	; case LED_NUMBER == 2
+	BREQ longsetdiode21G
+	dec R27				
+	CP LED_NUMBER, R27	; case LED_NUMBER == 1
+	BREQ longsetdiode20G*/
+	LDI R28, 0x09
 	dalej:
-
-	//pop R16	
-	//out SREG, R16
-	//pop R16
-	//PUSH R28
 
 	reti
 
 ; BREQ moze skonczyc maksymalnie o 64 instrukcje. RJMP o 2K (w switch bylo za krotko) wiec trzeba wykonac dlugi skok jmp - 4M
-longsetdiode02G:
-	jmp setdiode02G
+longCheckDiode9:
+	jmp checkDiode9
+longCheckDiode8:
+	jmp checkDiode8
+longCheckDiode7:
+	jmp checkDiode7
+longCheckDiode6:
+	jmp checkDiode6
+longCheckDiode5:
+	jmp checkDiode5
+longCheckDiode4:
+	jmp checkDiode4
+longCheckDiode3:
+	jmp checkDiode3
+longCheckDiode2:
+	jmp checkDiode2
+longCheckDiode1:
+	jmp checkDiode1
+
 longsetdiode01G:
-	LDI R28, 0x01
 	jmp setdiode01G
 longsetdiode00G:
-	LDI R28, 0x00
 	jmp setdiode00G
 longsetdiode12G:
 	jmp setdiode12G
@@ -137,9 +174,47 @@ longsetdiode21G:
 	jmp setdiode21G
 longsetdiode20G:
 	jmp setdiode20G
+
+
+longsetdiode01R:
+	jmp setdiode01R
+longsetdiode00R:
+	jmp setdiode00R
+longsetdiode12R:
+	jmp setdiode12R
+longsetdiode11R:
+	jmp setdiode11R
+longsetdiode10R:
+	jmp setdiode10R
+longsetdiode22R:
+	jmp setdiode22R
+longsetdiode21R:
+	jmp setdiode21R
+longsetdiode20R:
+	jmp setdiode20R
 longalldiodesOFF:
-	LDI R28, 0x01
 	jmp alldiodesOFF
+
+checkDiode9:
+	LDI R31, 0b00000001
+	LDI R16, 0b00000001
+	AND R31, R25
+	CP R31, R16
+	BREQ longsetdiode02G
+	LDI R31, 0b00000010
+	LDI R16, 0b00000010
+	AND R31, R25
+	CP R31, R16
+	BREQ longsetdiode02R
+	jmp backDiode9
+
+longsetdiode02R:
+	LDI R28, 0x08
+	jmp setdiode02R
+longsetdiode02G:
+	LDI R28, 0x08
+	jmp setdiode02G
+
 
 setP1:
 	ldi r17, P1
