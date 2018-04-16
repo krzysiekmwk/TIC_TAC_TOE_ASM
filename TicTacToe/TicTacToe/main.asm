@@ -43,11 +43,11 @@ out DDRD, R31
 ; 16MHz / 1024 / 540 = 29 -> taka wartoscia sie powinno ladowac OCR0
 LDI R31, 0b00000010		; Ustawienie tryby CTC przerwan -> reset zegara co przepelnienie porownujac do wartosci OCR
 OUT TCCR0A, R31
-LDI R31, 0b00000101		; Ustawienie preskalera na 1024
+LDI R31, 0b00000011		; Ustawienie preskalera na 1024
 OUT TCCR0B, R31
 LDI R31, 0b00000010		; Ustawienie compare match do porownan z OCR0A
 STS TIMSK0, R31
-LDI R31, 29				; Ustawienie OCR0
+LDI R31, 1				; Ustawienie OCR0
 OUT OCR0A, R31
 
 .DEF LED_NUMBER = R28	; Miejsce w pamieci na diode ktora ma sie zapalic
@@ -109,32 +109,40 @@ MULTIP_LED:
 	CP LED_NUMBER, R27	; case LED_NUMBER == 9
 	BREQ longCheckDiode9	; jesli nr diody == 9 zapal diode 9
 	backDiode9:
-	/*dec R27				; jesli nie, to nastepuje dekrementacja i kolejne sprawdzenie
+	dec R27				; jesli nie, to nastepuje dekrementacja i kolejne sprawdzenie
 	CP LED_NUMBER, R27	; case LED_NUMBER == 8
-	BREQ longsetdiode01G
+	BREQ longCheckDiode8
+	backDiode8:
 	dec R27				
 	CP LED_NUMBER, R27	; case LED_NUMBER == 7
-	BREQ longsetdiode00G
+	BREQ longCheckDiode7
+	backDiode7:
 	dec R27				
 	CP LED_NUMBER, R27	; case LED_NUMBER == 6
-	BREQ longsetdiode12G
+	BREQ longCheckDiode6
+	backDiode6:
 	dec R27				
 	CP LED_NUMBER, R27	; case LED_NUMBER == 5
-	BREQ longsetdiode11G
+	BREQ longCheckDiode5
+	backDiode5:
 	dec R27				
 	CP LED_NUMBER, R27	; case LED_NUMBER == 4
-	BREQ longsetdiode10G
+	BREQ longCheckDiode4
+	backDiode4:
 	dec R27				
 	CP LED_NUMBER, R27	; case LED_NUMBER == 3
-	BREQ longsetdiode22G
+	BREQ longCheckDiode3
+	backDiode3:
 	dec R27				
 	CP LED_NUMBER, R27	; case LED_NUMBER == 2
-	BREQ longsetdiode21G
+	BREQ longCheckDiode2
+	backDiode2:
 	dec R27				
 	CP LED_NUMBER, R27	; case LED_NUMBER == 1
-	BREQ longsetdiode20G*/
+	BREQ longCheckDiode1
+	backDiode1:
+
 	LDI R28, 0x09
-	dalej:
 
 	reti
 
@@ -158,43 +166,6 @@ longCheckDiode2:
 longCheckDiode1:
 	jmp checkDiode1
 
-longsetdiode01G:
-	jmp setdiode01G
-longsetdiode00G:
-	jmp setdiode00G
-longsetdiode12G:
-	jmp setdiode12G
-longsetdiode11G:
-	jmp setdiode11G
-longsetdiode10G:
-	jmp setdiode10G
-longsetdiode22G:
-	jmp setdiode22G
-longsetdiode21G:
-	jmp setdiode21G
-longsetdiode20G:
-	jmp setdiode20G
-
-
-longsetdiode01R:
-	jmp setdiode01R
-longsetdiode00R:
-	jmp setdiode00R
-longsetdiode12R:
-	jmp setdiode12R
-longsetdiode11R:
-	jmp setdiode11R
-longsetdiode10R:
-	jmp setdiode10R
-longsetdiode22R:
-	jmp setdiode22R
-longsetdiode21R:
-	jmp setdiode21R
-longsetdiode20R:
-	jmp setdiode20R
-longalldiodesOFF:
-	jmp alldiodesOFF
-
 checkDiode9:
 	LDI R31, 0b00000001
 	LDI R16, 0b00000001
@@ -206,6 +177,7 @@ checkDiode9:
 	AND R31, R25
 	CP R31, R16
 	BREQ longsetdiode02R
+	LDI R28, 0x08
 	jmp backDiode9
 
 longsetdiode02R:
@@ -215,6 +187,173 @@ longsetdiode02G:
 	LDI R28, 0x08
 	jmp setdiode02G
 
+checkDiode8:
+	LDI R31, 0b10000000
+	LDI R16, 0b10000000
+	AND R31, R23
+	CP R31, R16
+	BREQ longsetdiode01G
+	LDI R31, 0b10000000
+	LDI R16, 0b10000000
+	AND R31, R24
+	CP R31, R16
+	BREQ longsetdiode01R
+	LDI R28, 0x07
+	jmp backDiode8
+
+longsetdiode01R:
+	LDI R28, 0x07
+	jmp setdiode01R
+longsetdiode01G:
+	LDI R28, 0x07
+	jmp setdiode01G
+
+checkDiode7:
+	LDI R31, 0b01000000
+	LDI R16, 0b01000000
+	AND R31, R23
+	CP R31, R16
+	BREQ longsetdiode00G
+	LDI R31, 0b01000000
+	LDI R16, 0b01000000
+	AND R31, R24
+	CP R31, R16
+	BREQ longsetdiode00R
+	LDI R28, 0x06
+	jmp backDiode7
+
+longsetdiode00R:
+	LDI R28, 0x06
+	jmp setdiode00R
+longsetdiode00G:
+	LDI R28, 0x06
+	jmp setdiode00G
+
+checkDiode6:
+	LDI R31, 0b00100000
+	LDI R16, 0b00100000
+	AND R31, R23
+	CP R31, R16
+	BREQ longsetdiode12G
+	LDI R31, 0b00100000
+	LDI R16, 0b00100000
+	AND R31, R24
+	CP R31, R16
+	BREQ longsetdiode12R
+	LDI R28, 0x05
+	jmp backDiode6
+
+longsetdiode12R:
+	LDI R28, 0x05
+	jmp setdiode12R
+longsetdiode12G:
+	LDI R28, 0x05
+	jmp setdiode12G
+
+checkDiode5:
+	LDI R31, 0b00010000
+	LDI R16, 0b00010000
+	AND R31, R23
+	CP R31, R16
+	BREQ longsetdiode11G
+	LDI R31, 0b00010000
+	LDI R16, 0b00010000
+	AND R31, R24
+	CP R31, R16
+	BREQ longsetdiode11R
+	LDI R28, 0x04
+	jmp backDiode5
+
+longsetdiode11R:
+	LDI R28, 0x04
+	jmp setdiode11R
+longsetdiode11G:
+	LDI R28, 0x04
+	jmp setdiode11G
+
+checkDiode4:
+	LDI R31, 0b00001000
+	LDI R16, 0b00001000
+	AND R31, R23
+	CP R31, R16
+	BREQ longsetdiode10G
+	LDI R31, 0b00001000
+	LDI R16, 0b00001000
+	AND R31, R24
+	CP R31, R16
+	BREQ longsetdiode10R
+	LDI R28, 0x03
+	jmp backDiode4
+
+longsetdiode10R:
+	LDI R28, 0x03
+	jmp setdiode10R
+longsetdiode10G:
+	LDI R28, 0x03
+	jmp setdiode10G
+
+checkDiode3:
+	LDI R31, 0b00000100
+	LDI R16, 0b00000100
+	AND R31, R23
+	CP R31, R16
+	BREQ longsetdiode22G
+	LDI R31, 0b00000100
+	LDI R16, 0b00000100
+	AND R31, R24
+	CP R31, R16
+	BREQ longsetdiode22R
+	LDI R28, 0x02
+	jmp backDiode3
+
+longsetdiode22R:
+	LDI R28, 0x02
+	jmp setdiode22R
+longsetdiode22G:
+	LDI R28, 0x02
+	jmp setdiode22G
+
+checkDiode2:
+	LDI R31, 0b00000010
+	LDI R16, 0b00000010
+	AND R31, R23
+	CP R31, R16
+	BREQ longsetdiode21G
+	LDI R31, 0b00000010
+	LDI R16, 0b00000010
+	AND R31, R24
+	CP R31, R16
+	BREQ longsetdiode21R
+	LDI R28, 0x01
+	jmp backDiode2
+
+longsetdiode21R:
+	LDI R28, 0x01
+	jmp setdiode21R
+longsetdiode21G:
+	LDI R28, 0x01
+	jmp setdiode21G
+
+checkDiode1:
+	LDI R31, 0b00000001
+	LDI R16, 0b00000001
+	AND R31, R23
+	CP R31, R16
+	BREQ longsetdiode20G
+	LDI R31, 0b00000001
+	LDI R16, 0b00000001
+	AND R31, R24
+	CP R31, R16
+	BREQ longsetdiode20R
+	LDI R28, 0x00
+	jmp backDiode1
+
+longsetdiode20R:
+	LDI R28, 0x00
+	jmp setdiode20R
+longsetdiode20G:
+	LDI R28, 0x00
+	jmp setdiode20G
 
 setP1:
 	ldi r17, P1
@@ -351,15 +490,13 @@ setdiode00G:
 	ldi r17, GROW0
 	or r17, r22
 	out PORTD, r17
-	rjmp dalej 
-	//reti
+	reti
 setdiode00R:
 	ldi r17, COL0
 	out PORTC, r17
 	ldi r17, RROW0
 	or r17, r22
 	out PORTD, r17 
-	//rjmp dalej
 	reti
 setdiode01G:
 	ldi r17, COL0	
@@ -367,22 +504,20 @@ setdiode01G:
 	ldi r17, GROW1
 	or r17, r22
 	out PORTD, r17
-	rjmp dalej
-	//reti
+	reti
 setdiode01R:
 	ldi r17, COL0
 	out PORTC, r17
 	ldi r17, RROW1
 	or r17, r22
 	out PORTD, r17 
-	rjmp dalej
+	reti
 setdiode02G:
 	ldi r17, COL0	
 	out PORTC, r17
 	ldi r17, GROW2
 	or r17, r22
 	out PORTD, r17
-	//rjmp dalej
 	reti
 setdiode02R:
 	ldi r17, COL0
@@ -390,14 +525,13 @@ setdiode02R:
 	ldi r17, RROW2
 	or r17, r22
 	out PORTD, r17 
-	rjmp dalej
+	reti
 setdiode10G:
 	ldi r17, COL1	
 	out PORTC, r17
 	ldi r17, GROW0
 	or r17, r22
 	out PORTD, r17
-	//rjmp dalej 
 	reti
 setdiode10R:
 	ldi r17, COL1
@@ -405,82 +539,81 @@ setdiode10R:
 	ldi r17, RROW0
 	or r17, r22
 	out PORTD, r17 
-	rjmp dalej
+	reti
 setdiode11G:
 	ldi r17, COL1	
 	out PORTC, r17
 	ldi r17, GROW1
 	or r17, r22
 	out PORTD, r17
-	rjmp dalej 
+	reti
 setdiode11R:
 	ldi r17, COL1
 	out PORTC, r17
 	ldi r17, RROW1
 	or r17, r22
 	out PORTD, r17 
-	rjmp dalej
+	reti
 setdiode12G:
 	ldi r17, COL1	
 	out PORTC, r17
 	ldi r17, GROW2
 	or r17, r22
 	out PORTD, r17
-	rjmp dalej 
+	reti
 setdiode12R:
 	ldi r17, COL1
 	out PORTC, r17
 	ldi r17, RROW2
 	or r17, r22
 	out PORTD, r17 
-	rjmp dalej
+	reti
 setdiode20G:
 	ldi r17, COL2	
 	out PORTC, r17
 	ldi r17, GROW0
 	or r17, r22
 	out PORTD, r17
-	rjmp dalej
+	reti
 setdiode20R:
 	ldi r17, COL2	
 	out PORTC, r17
 	ldi r17, RROW0
 	or r17, r22
 	out PORTD, r17
-	rjmp dalej 
+	reti
 setdiode21G:
 	ldi r17, COL2
 	out PORTC, r17
 	ldi r17, GROW1
 	or r17, r22
 	out PORTD, r17 
-	rjmp dalej
+	reti
 setdiode21R:
 	ldi r17, COL2
 	out PORTC, r17
 	ldi r17, RROW1
 	or r17, r22
 	out PORTD, r17 
-	rjmp dalej
+	reti
 setdiode22G:
 	ldi r17, COL2	
 	out PORTC, r17
 	ldi r17, GROW2
 	or r17, r22
 	out PORTD, r17
-	rjmp dalej 
+	reti
 setdiode22R:
 	ldi r17, COL2
 	out PORTC, r17
 	ldi r17, RROW2
 	or r17, r22
 	out PORTD, r17 
-	rjmp dalej
+	reti
 alldiodesOFF:
 	ldi r17, 0b00000111
 	out PORTC, r17
 	ldi r17, 0b11000000
 	and r17, r22
 	out PORTD, r17 
-	//rjmp dalej
 	ret
