@@ -1,4 +1,4 @@
-R16 -> Wskaźnik stosu. Potrzebny żeby działało RCALL oraz RET (chociaż w sumie to raczej w SPL i SPH jest przechowywane wiec niby 16 mozna wykorzystac)
+R16 -> !PRZERWANIE! Licznik wskazujacy, ktora dioda powinna zostac zapalona
 R17 -> Jakaś zmienna tymczasowa, sluzaca do nadpisywania -> do uzytku normalnie
 R18 -> Wykorzystywane w DELAY (mozna użyć, ale nie wraz z delay - bo sie nadpisze)
 R19 -> Wykorzystywane w DELAY (mozna użyć, ale nie wraz z delay - bo sie nadpisze)
@@ -8,9 +8,9 @@ R22 -> aktualny player
 R23 -> Diody playera1 od 0 do 7  (01G, 00G, 12G, 11G, 10G, 22G, 21G, 20G) 
 R24 -> Diody playera2 od 0 do 7  (01R, 00R, 12R, 11R, 10R, 22R, 21R, 20R)
 R25 -> ostatnie diody P1 i P2 0b000000{P2}{P1} (02R, 02G)
-R26 -> !zmienna w timerze porownujaca bity diod do zapalenia
-R27 -> !zmienna w timerze licznikowa -> moze zostac zmieniona w tle bez zadnej wiedzy, wiec lepiej zostawic osobna
-R28 -> !Licznik wskazujacy, ktora dioda powinna zostac zapalona
+R26 -> !PRZERWANIE! zmienna w timerze porownujaca bity diod do zapalenia
+R27 -> !PRZERWANIE! zmienna w timerze licznikowa. wykorzystywana w instrukcji switch case -> moze zostac zmieniona w tle bez zadnej wiedzy, wiec lepiej zostawic osobna
+R28 -> !PRZERWANIE! słyży do porownywania przez AND czy dana dioda ma sie zapalic (porownuje R23, R24, R25)
 R29 -> Zmienna w funkcji przycisku, obslugujaca delay. poza przyciskiem normalnie dostepna
 R30 -> zmienna pomocnicza w programie, zeby sprawdzac, czy zostal wcisniety dany wybrany przycisk
 R31 -> Jakaś zmienna tymczasowa, sluzaca do nadpisywania -> do uzytku normalnie
