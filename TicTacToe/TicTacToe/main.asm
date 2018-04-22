@@ -102,6 +102,8 @@ start:	; Glowna petla programu
 
 	dalej:				; miejsce do powrotu z funcji warunkowych
 
+	//Sprawdzenie kto wygral
+
     rjmp start
 
 ; BREQ moze skonczyc maksymalnie o 64 instrukcje. RJMP o 2K (w switch bylo za krotko) wiec trzeba wykonac dlugi skok jmp - 4M
