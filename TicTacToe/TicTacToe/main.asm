@@ -198,23 +198,23 @@ dalej:				; miejsce do powrotu z funcji warunkowych
 
 	; JEZELI ZAPALONO DIODE KTORA JUZ JEST ZAPALONA TO BUTTON_PIN JEST USTAWIANY NA 0x00
 	longSetDiodeRegisterP1:
-		ldi r1, P1_DIODES
+		ldi r31, P1_DIODES
 		or P1_DIODES, r17
-		CP r1, P1_DIODES
+		CP r31, P1_DIODES
 		BREQ BUTTON_PIN_ZERO
 		ret
 
 	longSetDiodeRegisterP2:
-		ldi r1, P2_DIODES
+		ldi r31, P2_DIODES
 		or P2_DIODES, r17
-		CP r1, P2_DIODES
+		CP r31, P2_DIODES
 		BREQ BUTTON_PIN_ZERO
 		ret
 
 	longSetDiodeRegisterLast:
-		ldi r1, LAST_DIODES
+		ldi r31, LAST_DIODES
 		or LAST_DIODES, r17
-		CP r1, LAST_DIODES
+		CP r31, LAST_DIODES
 		BREQ BUTTON_PIN_ZERO		
 		ret
 
