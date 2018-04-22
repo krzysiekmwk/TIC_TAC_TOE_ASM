@@ -30,9 +30,6 @@ out SPL, R16			; przepisanie R16 do SPL - rejestru który przechowuje wskaznik ko
 
 .DEF BUTTON_PIN = R21		; Miejsce w pamieci na ktory zostal wcisniety
 LDI BUTTON_PIN, 0x00		; Przypisanie zera do przycisku - zaden nie zostal wcisniety
-.DEF P1_DIODES = R23 ;diody 0-7 playera 1
-.DEF P2_DIODES = R24 ;diody 0-7 playera 2
-.DEF LAST_DIODES = R25 ;ostatnie diody 8, 0b000000{P2}{P1}
 
 LDI R31, 0b00111000		; PIN 3,4,5 portu B ustawione jako wyjscia
 OUT DDRB, R31			; Przypisanie wartosci do portu
@@ -56,171 +53,339 @@ STS TIMSK0, R31
 LDI R31, 29				; Ustawienie OCR0
 OUT OCR0A, R31
 
-LDI P1_DIODES, 0b10000000
-LDI P2_DIODES, 0b00010001
-LDI LAST_DIODES, 0b00000010
+; Latwiejsze korzystanie z diod
+.DEF P1_DIODES = R23 ;diody 0-7 playera 1
+.DEF P2_DIODES = R24 ;diody 0-7 playera 2
+.DEF LAST_DIODES = R25 ;ostatnie diody 8, 0b000000{P2}{P1}
+LDI P1_DIODES, 0x00
+LDI P2_DIODES, 0x00
+LDI LAST_DIODES, 0x00
+
+RCALL setP1
+RCALL delay50ms
+
 SEI		; Odblokowanie przerwan
 
+RCALL delay50ms
+
 start:	; Glowna petla programu
-
     RCALL checkButtons	; Wywolanie funkcji do sprawdzenia przyciskow
-
-	ldi R17, 0x00
-	CP BUTTON_PIN, r17
-	BREQ playerHasBeenSet; jezeli nic nie wcisnieto to nie zmieniaj playera
-
-	ldi R17, P1
-	CP R22, R17 
-	BREQ player2 ;jezeli jest teraz P1 to ustawiamy P2, jezeli nie to P1	
-	RCALL setP1
-	JMP playerHasBeenSet
-player2:
-	RCALL setP2
-
-playerHasBeenSet:
-
-	ldi R17, P2
-	CP R22, R17
-	BREQ player2Round
 
 	; Taki switch - case troche
 	LDI R30, 0x09		; SWITCH - Numer przycisku do porownania
-	
-	ldi r17, 0x01
 	CP BUTTON_PIN, R30	; case BUTTON_PIN == 9
-	BREQ setDiodeRegisterLast; jesli przycisk == 9 zapal diode 9
+	BREQ longsetdiode9	; jesli przycisk == 9 ustaw diode 9 w zaleznoci od sprawdzonych waronkow 
 	dec R30				; jesli nie, to nastepuje dekrementacja i kolejne sprawdzenie
-
-	ldi r17, 0x80
 	CP BUTTON_PIN, R30	; case BUTTON_PIN == 8
-	BREQ setDiodeRegisterP1
-	dec R30			
-		
-	ldi r17, 0x40
+	BREQ longsetdiode8
+	dec R30				
 	CP BUTTON_PIN, R30	; case BUTTON_PIN == 7
-	BREQ setDiodeRegisterP1
+	BREQ longsetdiode7
 	dec R30				
-	
-	ldi r17, 0x20
 	CP BUTTON_PIN, R30	; case BUTTON_PIN == 6
-	BREQ setDiodeRegisterP1
-	dec R30
-		
-	ldi r17, 0x10			
+	BREQ longsetdiode6
+	dec R30				
 	CP BUTTON_PIN, R30	; case BUTTON_PIN == 5
-	BREQ setDiodeRegisterP1
-	dec R30		
-			
-	ldi r17, 0x08
+	BREQ longsetdiode5
+	dec R30				
 	CP BUTTON_PIN, R30	; case BUTTON_PIN == 4
-	BREQ setDiodeRegisterP1
-	dec R30			
-		
-	ldi r17, 0x04
+	BREQ longsetdiode4
+	dec R30				
 	CP BUTTON_PIN, R30	; case BUTTON_PIN == 3
-	BREQ setDiodeRegisterP1
-	dec R30
-		
-	ldi r17, 0x02			
+	BREQ longsetdiode3
+	dec R30				
 	CP BUTTON_PIN, R30	; case BUTTON_PIN == 2
-	BREQ setDiodeRegisterP1
+	BREQ longsetdiode2
 	dec R30				
-	
-	ldi r17, 0x01
 	CP BUTTON_PIN, R30	; case BUTTON_PIN == 1
-	BREQ setDiodeRegisterP1
-	jmp dalej
+	BREQ longsetdiode1
 
-setDiodeRegisterP1:
-	RCALL longSetDiodeRegisterP1
-	jmp dalej
-
-setDiodeRegisterLast:
-	RCALL longSetDiodeRegisterLast
-	jmp dalej
-
-player2Round:
-		; Taki switch - case troche
-	LDI R30, 0x09		; SWITCH - Numer przycisku do porownania
-	ldi r17, 0x02
-	CP BUTTON_PIN, R30	; case BUTTON_PIN == 9
-	BREQ setDiodeRegisterLast; jesli przycisk == 9 zapal diode 9
-	dec R30				; jesli nie, to nastepuje dekrementacja i kolejne sprawdzenie
-
-	ldi r17, 0x80
-	CP BUTTON_PIN, R30	; case BUTTON_PIN == 8
-	BREQ setDiodeRegisterP2
-	dec R30			
-		
-	ldi r17, 0x40
-	CP BUTTON_PIN, R30	; case BUTTON_PIN == 7
-	BREQ setDiodeRegisterP2
-	dec R30				
-	
-	ldi r17, 0x20
-	CP BUTTON_PIN, R30	; case BUTTON_PIN == 6
-	BREQ setDiodeRegisterP2
-	dec R30
-		
-	ldi r17, 0x10			
-	CP BUTTON_PIN, R30	; case BUTTON_PIN == 5
-	BREQ setDiodeRegisterP2
-	dec R30		
-			
-	ldi r17, 0x08
-	CP BUTTON_PIN, R30	; case BUTTON_PIN == 4
-	BREQ setDiodeRegisterP2
-	dec R30			
-		
-	ldi r17, 0x04
-	CP BUTTON_PIN, R30	; case BUTTON_PIN == 3
-	BREQ setDiodeRegisterP2
-	dec R30
-		
-	ldi r17, 0x02			
-	CP BUTTON_PIN, R30	; case BUTTON_PIN == 2
-	BREQ setDiodeRegisterP2
-	dec R30				
-	
-	ldi r17, 0x01
-	CP BUTTON_PIN, R30	; case BUTTON_PIN == 1
-	BREQ setDiodeRegisterP2
-	jmp dalej
-
-
-setDiodeRegisterP2:
-	RCALL longSetDiodeRegisterP2
-	jmp dalej
-	
-dalej:				; miejsce do powrotu z funcji warunkowych
+	dalej:				; miejsce do powrotu z funcji warunkowych
 
     rjmp start
 
-	; JEZELI ZAPALONO DIODE KTORA JUZ JEST ZAPALONA TO BUTTON_PIN JEST USTAWIANY NA 0x00
-	longSetDiodeRegisterP1:
-		ldi r31, P1_DIODES
-		or P1_DIODES, r17
-		CP r31, P1_DIODES
-		BREQ BUTTON_PIN_ZERO
-		ret
+; BREQ moze skonczyc maksymalnie o 64 instrukcje. RJMP o 2K (w switch bylo za krotko) wiec trzeba wykonac dlugi skok jmp - 4M
+longsetdiode9:
+	jmp checkAndSetDiodeRegister9
+longsetdiode8:
+	jmp checkAndSetDiodeRegister8
+longsetdiode7:
+	jmp checkAndSetDiodeRegister7
+longsetdiode6:
+	jmp checkAndSetDiodeRegister6
+longsetdiode5:
+	jmp checkAndSetDiodeRegister5
+longsetdiode4:
+	jmp checkAndSetDiodeRegister4
+longsetdiode3:
+	jmp checkAndSetDiodeRegister3
+longsetdiode2:
+	jmp checkAndSetDiodeRegister2
+longsetdiode1:
+	jmp checkAndSetDiodeRegister1
 
-	longSetDiodeRegisterP2:
-		ldi r31, P2_DIODES
-		or P2_DIODES, r17
-		CP r31, P2_DIODES
-		BREQ BUTTON_PIN_ZERO
-		ret
+//Schemat dzialania: 
+//Sprawdzic czy nie nie jest juz cos ustawione na danym pinie (OR, a potem AND)
+//Jesli jest to wyskocz, jesli nie to:
+//sprawdzic jaki jest aktualny player ustawiony, ustawic dla niego diode i zmienic playera
+checkAndSetDiodeRegister9:
+	LDI R31, 0b00000011
+	AND R31, LAST_DIODES	; AND sprawdza czy na danym bicie jest jeden czy nie
+	TST R31					; Ustawia flage, sprawdzajac czy AND jest zerem
+	BREQ checkColorDiode9	; jesli jest zerem to ustawia odpowiednia diode
+	jmp dalej				; jesli nie jest to wraca do programu (za przyciskami)
 
-	longSetDiodeRegisterLast:
-		ldi r31, LAST_DIODES
-		or LAST_DIODES, r17
-		CP r31, LAST_DIODES
-		BREQ BUTTON_PIN_ZERO		
-		ret
+checkColorDiode9:			; Znaczy ze trzeba dana diode ustawic. Tu nastapi sprawdzenie playera by okreslic ktora
+	ldi r17, P1
+	AND r17, R22			
+	TST r17					; Sprawdzenie czy jest to ruch player 1
+	BRNE setGreenDiode9		; Jesli jest to ustaw zielona diode
+	jmp setRedDiode9		; Jesli nie to czerwona diode
 
-	BUTTON_PIN_ZERO:
-		ldi BUTTON_PIN, 0x00
-		rjmp dalej
+setRedDiode9:
+	RCALL setP1
+	LDI R31, 0b00000010
+	OR LAST_DIODES, R31
+	jmp dalej
+
+setGreenDiode9:
+	RCALL setP2
+	LDI R31, 0b00000001
+	OR LAST_DIODES, R31
+	jmp dalej
+
+checkAndSetDiodeRegister8:
+	LDI R31, 0b10000000
+	LDI R17, 0b00000000
+	OR R17, P1_DIODES
+	OR R17, P2_DIODES
+	AND R31, R17
+	TST R31
+	BREQ checkColorDiode8
+	jmp dalej
+
+checkColorDiode8:
+	ldi r17, P1
+	AND r17, R22			
+	TST r17
+	BRNE setGreenDiode8	
+	jmp setRedDiode8
+
+setRedDiode8:
+	RCALL setP1
+	LDI R31, 0b10000000
+	OR P2_DIODES, R31
+	jmp dalej
+
+setGreenDiode8:
+	RCALL setP2
+	LDI R31, 0b10000000
+	OR P1_DIODES, R31
+	jmp dalej
+
+checkAndSetDiodeRegister7:
+	LDI R31, 0b01000000
+	LDI R17, 0b00000000
+	OR R17, P1_DIODES
+	OR R17, P2_DIODES
+	AND R31, R17
+	TST R31
+	BREQ checkColorDiode7
+	jmp dalej
+
+checkColorDiode7:
+	ldi r17, P1
+	AND r17, R22			
+	TST r17
+	BRNE setGreenDiode7	
+	jmp setRedDiode7
+
+setRedDiode7:
+	RCALL setP1
+	LDI R31, 0b01000000
+	OR P2_DIODES, R31
+	jmp dalej
+
+setGreenDiode7:
+	RCALL setP2
+	LDI R31, 0b01000000
+	OR P1_DIODES, R31
+	jmp dalej
+
+checkAndSetDiodeRegister6:
+	LDI R31, 0b00100000
+	LDI R17, 0b00000000
+	OR R17, P1_DIODES
+	OR R17, P2_DIODES
+	AND R31, R17
+	TST R31
+	BREQ checkColorDiode6
+	jmp dalej
+
+checkColorDiode6:
+	ldi r17, P1
+	AND r17, R22			
+	TST r17
+	BRNE setGreenDiode6	
+	jmp setRedDiode6
+
+setRedDiode6:
+	RCALL setP1
+	LDI R31, 0b00100000
+	OR P2_DIODES, R31
+	jmp dalej
+
+setGreenDiode6:
+	RCALL setP2
+	LDI R31, 0b00100000
+	OR P1_DIODES, R31
+	jmp dalej
+
+checkAndSetDiodeRegister5:
+	LDI R31, 0b00010000
+	LDI R17, 0b00000000
+	OR R17, P1_DIODES
+	OR R17, P2_DIODES
+	AND R31, R17
+	TST R31
+	BREQ checkColorDiode5
+	jmp dalej
+
+checkColorDiode5:
+	ldi r17, P1
+	AND r17, R22			
+	TST r17
+	BRNE setGreenDiode5	
+	jmp setRedDiode5
+
+setRedDiode5:
+	RCALL setP1
+	LDI R31, 0b00010000
+	OR P2_DIODES, R31
+	jmp dalej
+
+setGreenDiode5:
+	RCALL setP2
+	LDI R31, 0b00010000
+	OR P1_DIODES, R31
+	jmp dalej
+
+checkAndSetDiodeRegister4:
+	LDI R31, 0b00001000
+	LDI R17, 0b00000000
+	OR R17, P1_DIODES
+	OR R17, P2_DIODES
+	AND R31, R17
+	TST R31
+	BREQ checkColorDiode4
+	jmp dalej
+
+checkColorDiode4:
+	ldi r17, P1
+	AND r17, R22			
+	TST r17
+	BRNE setGreenDiode4	
+	jmp setRedDiode4
+
+setRedDiode4:
+	RCALL setP1
+	LDI R31, 0b00001000
+	OR P2_DIODES, R31
+	jmp dalej
+
+setGreenDiode4:
+	RCALL setP2
+	LDI R31, 0b00001000
+	OR P1_DIODES, R31
+	jmp dalej
+
+checkAndSetDiodeRegister3:
+	LDI R31, 0b00000100
+	LDI R17, 0b00000000
+	OR R17, P1_DIODES
+	OR R17, P2_DIODES
+	AND R31, R17
+	TST R31
+	BREQ checkColorDiode3
+	jmp dalej
+
+checkColorDiode3:
+	ldi r17, P1
+	AND r17, R22			
+	TST r17
+	BRNE setGreenDiode3
+	jmp setRedDiode3
+
+setRedDiode3:
+	RCALL setP1
+	LDI R31, 0b00000100
+	OR P2_DIODES, R31
+	jmp dalej
+
+setGreenDiode3:
+	RCALL setP2
+	LDI R31, 0b00000100
+	OR P1_DIODES, R31
+	jmp dalej
+
+checkAndSetDiodeRegister2:
+	LDI R31, 0b00000010
+	LDI R17, 0b00000000
+	OR R17, P1_DIODES
+	OR R17, P2_DIODES
+	AND R31, R17
+	TST R31
+	BREQ checkColorDiode2
+	jmp dalej
+
+checkColorDiode2:
+	ldi r17, P1
+	AND r17, R22			
+	TST r17
+	BRNE setGreenDiode2	
+	jmp setRedDiode2
+
+setRedDiode2:
+	RCALL setP1
+	LDI R31, 0b00000010
+	OR P2_DIODES, R31
+	jmp dalej
+
+setGreenDiode2:
+	RCALL setP2
+	LDI R31, 0b00000010
+	OR P1_DIODES, R31
+	jmp dalej
+
+checkAndSetDiodeRegister1:
+	LDI R31, 0b00000001
+	LDI R17, 0b00000000
+	OR R17, P1_DIODES
+	OR R17, P2_DIODES
+	AND R31, R17
+	TST R31
+	BREQ checkColorDiode1
+	jmp dalej
+
+checkColorDiode1:
+	ldi r17, P1
+	AND r17, R22			
+	TST r17
+	BRNE setGreenDiode1
+	jmp setRedDiode1
+
+setRedDiode1:
+	RCALL setP1
+	LDI R31, 0b00000001
+	OR P2_DIODES, R31
+	jmp dalej
+
+setGreenDiode1:
+	RCALL setP2
+	LDI R31, 0b00000001
+	OR P1_DIODES, R31
+	jmp dalej
+
 
 MULTIP_LED:
 	rcall alldiodesOFF
@@ -288,12 +453,12 @@ longCheckDiode1:
 	jmp checkDiode1
 
 checkDiode9:
-	LDI R28, 0b00000001		; to czy dana dioda ma sie zapalic jest zakodowane w rejestrach P1_DIODES P2_DIODES oraz LAST_DIODES
-	AND R28, LAST_DIODES			; AND sprawdza czy na danym bicie jest jeden czy nie
+	LDI R28, 0b00000001		; to czy dana dioda ma sie zapalic jest zakodowane w rejestrach R23 R24 oraz R25
+	AND R28, R25			; AND sprawdza czy na danym bicie jest jeden czy nie
 	TST R28					; Ustawia flage, sprawdzajac czy AND jest zerem
 	BRNE longsetdiode02G	; Jesli nie jest zerem, to zaswiec diode
 	LDI R28, 0b00000010		; Jesli jest to idzie i sprawdza dalej
-	AND R28, LAST_DIODES
+	AND R28, R25
 	TST R28
 	BRNE longsetdiode02R
 	LDI LED_NUMBER, 0x08	; Jesli zadna dioda sie nie zapalila, to zmniejsza index numeru diody do zaswiecenia
@@ -308,11 +473,11 @@ longsetdiode02G:
 
 checkDiode8:
 	LDI R28, 0b10000000
-	AND R28, P1_DIODES
+	AND R28, R23
 	TST R28
 	BRNE longsetdiode01G
 	LDI R28, 0b10000000
-	AND R28, P2_DIODES
+	AND R28, R24
 	TST R28
 	BRNE longsetdiode01R
 	LDI LED_NUMBER, 0x07
@@ -327,11 +492,11 @@ longsetdiode01G:
 
 checkDiode7:
 	LDI R28, 0b01000000
-	AND R28, P1_DIODES
+	AND R28, R23
 	TST R28
 	BRNE longsetdiode00G
 	LDI R28, 0b01000000
-	AND R28, P2_DIODES
+	AND R28, R24
 	TST R28
 	BRNE longsetdiode00R
 	LDI LED_NUMBER, 0x06
@@ -346,11 +511,11 @@ longsetdiode00G:
 
 checkDiode6:
 	LDI R28, 0b00100000
-	AND R28, P1_DIODES
+	AND R28, R23
 	TST R28
 	BRNE longsetdiode12G
 	LDI R28, 0b00100000
-	AND R28, P2_DIODES
+	AND R28, R24
 	TST R28
 	BRNE longsetdiode12R
 	LDI LED_NUMBER, 0x05
@@ -365,11 +530,11 @@ longsetdiode12G:
 
 checkDiode5:
 	LDI R28, 0b00010000
-	AND R28, P1_DIODES
+	AND R28, R23
 	TST R28
 	BRNE longsetdiode11G
 	LDI R28, 0b00010000
-	AND R28, P2_DIODES
+	AND R28, R24
 	TST R28
 	BRNE longsetdiode11R
 	LDI LED_NUMBER, 0x04
@@ -384,11 +549,11 @@ longsetdiode11G:
 
 checkDiode4:
 	LDI R28, 0b00001000
-	AND R28, P1_DIODES
+	AND R28, R23
 	TST R28
 	BRNE longsetdiode10G
 	LDI R28, 0b00001000
-	AND R28, P2_DIODES
+	AND R28, R24
 	TST R28
 	BRNE longsetdiode10R
 	LDI LED_NUMBER, 0x03
@@ -403,11 +568,11 @@ longsetdiode10G:
 
 checkDiode3:
 	LDI R28, 0b00000100
-	AND R28, P1_DIODES
+	AND R28, R23
 	TST R28
 	BRNE longsetdiode22G
 	LDI R28, 0b00000100
-	AND R28, P2_DIODES
+	AND R28, R24
 	TST R28
 	BRNE longsetdiode22R
 	LDI LED_NUMBER, 0x02
@@ -422,11 +587,11 @@ longsetdiode22G:
 
 checkDiode2:
 	LDI R28, 0b00000010
-	AND R28, P1_DIODES
+	AND R28, R23
 	TST R28
 	BRNE longsetdiode21G
 	LDI R28, 0b00000010
-	AND R28, P2_DIODES
+	AND R28, R24
 	TST R28
 	BRNE longsetdiode21R
 	LDI LED_NUMBER, 0x01
@@ -441,11 +606,11 @@ longsetdiode21G:
 
 checkDiode1:
 	LDI R28, 0b00000001
-	AND R28, P1_DIODES
+	AND R28, R23
 	TST R28
 	BRNE longsetdiode20G
 	LDI R28, 0b00000001
-	AND R28, P2_DIODES
+	AND R28, R24
 	TST R28
 	BRNE longsetdiode20R
 	LDI LED_NUMBER, 0x00
@@ -510,30 +675,63 @@ checkButtons:		; Sprawdzenie czy zostal wcisniety jakis przycisk
 		LDI R31, 0b00110111	; Ustawienie na wyjsciu samych 1 i jednego zera. Wejscia podciagniete w gore
 		OUT PORTB, R31		; Przypisanie wartosci do portu B
 		NOP					; instrukcja NOP -> bez niej nie dziala sprawdzenie portu. Danie chwilki czasu, by procesor ulozyl dane
+		NOP
+		NOP
+		RCALL delay50ms
 		SBIS PINB, 0		; Sprawdzenie czy jest 0 odczytane na pinie 0. Jesli tak, to wykonaj instrukcje, a jesli nie, to idz dalej
 			rjmp pin1
+		NOP
+		NOP
+		NOP
+		RCALL delay50ms
 		SBIS PINB, 1
 			rjmp pin2
+		NOP
+		NOP
+		NOP
+		RCALL delay50ms
 		SBIS PINB, 2
 			rjmp pin3
 
 		LDI R31, 0b00101111	; Schemat dzialania podobny, tylko teraz inna kolumna jest wyzerowana
 		OUT PORTB, R31
 		NOP
+		NOP
+		NOP
+		RCALL delay50ms
 		SBIS PINB, 0
 			rjmp pin4
+		NOP
+		NOP
+		NOP
+		RCALL delay50ms
 		SBIS PINB, 1
 			rjmp pin5
+		NOP
+		NOP
+		NOP
+		RCALL delay50ms
 		SBIS PINB, 2
 			rjmp pin6
 
 		LDI R31, 0b00011111
 		OUT PORTB, R31
 		NOP
+		NOP
+		NOP
+		RCALL delay50ms
 		SBIS PINB, 0
 			rjmp pin7
+		NOP
+		NOP
+		NOP
+		RCALL delay50ms
 		SBIS PINB, 1
 			rjmp pin8
+		NOP
+		NOP
+		NOP
+		RCALL delay50ms
 		SBIS PINB, 2
 			rjmp pin9
 
