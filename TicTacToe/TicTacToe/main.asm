@@ -100,126 +100,8 @@ start:	; Glowna petla programu
 	CP BUTTON_PIN, R30	; case BUTTON_PIN == 1
 	BREQ longsetdiode1
 
-	dalej:				; miejsce do powrotu z funcji warunkowych
-
-	//Sprawdzenie kto wygral
-;sprawdzenie P1 bez ostatniej diody
-	LDI R1, 0b11100000	
-	AND R1, P1_DIODES
-	CP  R1, 0b11100000	
-	BREQ Player1Win	
-
-	LDI R1, 0b00011100	
-	AND R1, P1_DIODES
-	CP  R1, 0b00011100	
-	BREQ Player1Win	
-
-	LDI R1, 0b10010010	
-	AND R1, P1_DIODES
-	CP  R1, 0b10010010
-	BREQ Player1Win	
-			
-	LDI R1, 0b01001001
-	AND R1, P1_DIODES
-	CP  R1, 0b01001001
-	BREQ Player1Win
-
-	LDI R1, 0b00101010
-	AND R1, P1_DIODES
-	CP  R1, 0b00101010
-	BREQ Player1Win
-
-;Wygrane P2 bez ostatniej diody
-	LDI R1, 0b11100000	
-	AND R1, P2_DIODES
-	CP  R1, 0b11100000	
-	BREQ Player2Win	
-
-	LDI R1, 0b00011100	
-	AND R1, P2_DIODES
-	CP  R1, 0b00011100	
-	BREQ Player2Win	
-
-	LDI R1, 0b10010010	
-	AND R1, P2_DIODES
-	CP  R1, 0b10010010
-	BREQ Player2Win	
-			
-	LDI R1, 0b01001001
-	AND R1, P2_DIODES
-	CP  R1, 0b01001001
-	BREQ Player2Win
-
-	LDI R1, 0b00101010
-	AND R1, P2_DIODES
-	CP  R1, 0b00101010
-	BREQ Player2Win
-
-;SPRAWDZANIE CZY OSTATNIA DIODA P1 JEST WLACZONA JEZELI TAK TO MOZNA SPRAWDZAC WARUNKI KTORE JA OBEJMUJA
-	LDI R1, 0b00000001
-	AND R1, LAST_DIODES
-	CP  R1, 0b00000001
-	BREQ CheckWithLastDiodeP1
-
-;SPRAWDZANIE CZY OSTATNIA DIODA P2 JEST WLACZONA JEZELI TAK TO MOZNA SPRAWDZAC WARUNKI KTORE JA OBEJMUJA
-P2LastDiodeCheck:
-	LDI R1, 0b00000010
-	AND R1, LAST_DIODES
-	CP  R1, 0b00000010
-	BREQ CheckWithLastDiodeP2
-
-	;petla glowna
-    rjmp start
-
-;Sprawdzanie wygranej z ostatnia dioda P1
-CheckWithLastDiodeP1:
-	LDI R1, 0b00000011	
-	AND R1, P1_DIODES
-	CP  R1, 0b00000011
-	BREQ Player1Win	
-			
-	LDI R1, 0b00100100
-	AND R1, P1_DIODES
-	CP  R1, 0b00100100
-	BREQ Player1Win
-
-	LDI R1, 0b10001000
-	AND R1, P1_DIODES
-	CP  R1, 0b10001000
-	BREQ Player1Win
-
-	rjmp P2LastDiodeCheck
-
-;Sprawdzanie wygranej z ostatnia dioda P2
-CheckWithLastDiodeP1:
-	LDI R1, 0b00000011	
-	AND R1, P2_DIODES
-	CP  R1, 0b00000011
-	BREQ Player2Win	
-			
-	LDI R1, 0b00100100
-	AND R1, P2_DIODES
-	CP  R1, 0b00100100
-	BREQ Player2Win
-
-	LDI R1, 0b10001000
-	AND R1, P2_DIODES
-	CP  R1, 0b10001000
-	BREQ Player2Win
-
-	;JEZELI NIKT NIE WYGRAL TO LECI PETLA GLOWNA
-	rjmp start
-
-;WYGRANA P1
-Player1Win:
-	RCALL alldiodesOFF
-	rjmp SETUP
-;Wygrana P2
-Player2Win:
-	RCALL alldiodesOFF
-	rjmp SETUP
-
-
+	rjmp dalej
+	
 ; BREQ moze skonczyc maksymalnie o 64 instrukcje. RJMP o 2K (w switch bylo za krotko) wiec trzeba wykonac dlugi skok jmp - 4M
 longsetdiode9:
 	jmp checkAndSetDiodeRegister9
@@ -239,6 +121,145 @@ longsetdiode2:
 	jmp checkAndSetDiodeRegister2
 longsetdiode1:
 	jmp checkAndSetDiodeRegister1
+
+	dalej:				; miejsce do powrotu z funcji warunkowych
+
+	//Sprawdzenie kto wygral
+;sprawdzenie P1 bez ostatniej diody
+	LDI R31, 0b11100000
+	LDI R17, 0b11100000
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win	
+
+	LDI R31, 0b00011100	
+	LDI R17, 0b00011100	
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win	
+
+	LDI R31, 0b10010010	
+	LDI R17, 0b10010010	
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win	
+			
+	LDI R31, 0b01001001
+	LDI R17, 0b01001001
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win
+
+	LDI R31, 0b00101010
+	LDI R17, 0b00101010
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win
+
+;Wygrane P2 bez ostatniej diody
+	LDI R31, 0b11100000	
+	LDI R17, 0b11100000
+	AND R31, P2_DIODES
+	CP  R31, R17	
+	BREQ Player2Win	
+
+	LDI R31, 0b00011100	
+	LDI R17, 0b00011100	
+	AND R31, P2_DIODES
+	CP  R31, R17
+	BREQ Player2Win	
+
+	LDI R31, 0b10010010	
+	LDI R17, 0b10010010	
+	AND R31, P2_DIODES
+	CP  R31, R17 
+	BREQ Player2Win	
+			
+	LDI R31, 0b01001001
+	LDI R17, 0b01001001
+	AND R31, P2_DIODES
+	CP  R31, R17
+	BREQ Player2Win
+
+	LDI R31, 0b00101010
+	LDI R17, 0b00101010
+	AND R31, P2_DIODES
+	CP  R31, R17
+	BREQ Player2Win
+
+;SPRAWDZANIE CZY OSTATNIA DIODA P1 JEST WLACZONA JEZELI TAK TO MOZNA SPRAWDZAC WARUNKI KTORE JA OBEJMUJA
+	LDI R31, 0b00000001
+	LDI R17, 0b00000001
+	AND R31, LAST_DIODES
+	CP  R31, R17
+	BREQ CheckWithLastDiodeP1
+
+;SPRAWDZANIE CZY OSTATNIA DIODA P2 JEST WLACZONA JEZELI TAK TO MOZNA SPRAWDZAC WARUNKI KTORE JA OBEJMUJA
+P2LastDiodeCheck:
+	LDI R31, 0b00000010
+	LDI R17, 0b00000010
+	AND R31, LAST_DIODES
+	CP  R31, R17
+	BREQ CheckWithLastDiodeP2
+
+	;petla glowna
+    rjmp start
+
+;WYGRANA P1 jest tutaj bo relative branch nie siega
+Player1Win:
+	RCALL alldiodesOFF
+	rjmp SETUP
+;Wygrana P2
+Player2Win:
+	RCALL alldiodesOFF
+	rjmp SETUP
+
+;Sprawdzanie wygranej z ostatnia dioda P1
+CheckWithLastDiodeP1:
+	LDI R31, 0b00000011	
+	LDI R17, 0b00000011	
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win	
+			
+	LDI R31, 0b00100100
+	LDI R17, 0b00100100
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win
+
+	LDI R31, 0b10001000
+	LDI R17, 0b10001000
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win
+
+	rjmp P2LastDiodeCheck
+
+;Sprawdzanie wygranej z ostatnia dioda P2
+CheckWithLastDiodeP2:
+	LDI R31, 0b00000011
+	LDI R17, 0b00000011		
+	AND R31, P2_DIODES
+	CP  R31, R17
+	BREQ Player2Win	
+			
+	LDI R31, 0b00100100
+	LDI R17, 0b00100100
+	AND R31, P2_DIODES
+	CP  R31, R17
+	BREQ Player2Win
+
+	LDI R31, 0b10001000
+	LDI R17, 0b10001000
+	AND R31, P2_DIODES
+	CP  R31, R17
+	BREQ Player2Win
+
+	;JEZELI NIKT NIE WYGRAL TO LECI PETLA GLOWNA
+	rjmp start
+
+
 
 //Schemat dzialania: 
 //Sprawdzic czy nie nie jest juz cos ustawione na danym pinie (OR, a potem AND)
