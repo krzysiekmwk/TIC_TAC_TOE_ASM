@@ -22,7 +22,7 @@ SETUP:
 .DEF LED_NUMBER = R16	; Miejsce w pamieci na diode ktora ma sie zapalic
 LDI LED_NUMBER, 0x09
 
-cli						; wyl¹czenie przerwan
+cli						; wylšczenie przerwan
 ldi R16, HIGH(RAMEND)   ; zaladowanie adresu konca pamieci[stala RAMEND - zdefiniowana w pliku](starszej jego czesci) SRAM do R16 
 out SPH, R16            ; zaladowanie zawartosci rejestru R16 do SPH(starszej czesci) rejestru ktory przechowuje tzw. wskaznik konca stosu 
 ldi R16, LOW(RAMEND)    ; zaladowanie (mlodszej czesci) adresu konca pamieci sram do R16 
@@ -103,8 +103,122 @@ start:	; Glowna petla programu
 	dalej:				; miejsce do powrotu z funcji warunkowych
 
 	//Sprawdzenie kto wygral
+;sprawdzenie P1 bez ostatniej diody
+	LDI R1, 0b11100000	
+	AND R1, P1_DIODES
+	CP  R1, 0b11100000	
+	BREQ Player1Win	
 
+	LDI R1, 0b00011100	
+	AND R1, P1_DIODES
+	CP  R1, 0b00011100	
+	BREQ Player1Win	
+
+	LDI R1, 0b10010010	
+	AND R1, P1_DIODES
+	CP  R1, 0b10010010
+	BREQ Player1Win	
+			
+	LDI R1, 0b01001001
+	AND R1, P1_DIODES
+	CP  R1, 0b01001001
+	BREQ Player1Win
+
+	LDI R1, 0b00101010
+	AND R1, P1_DIODES
+	CP  R1, 0b00101010
+	BREQ Player1Win
+
+;Wygrane P2 bez ostatniej diody
+	LDI R1, 0b11100000	
+	AND R1, P2_DIODES
+	CP  R1, 0b11100000	
+	BREQ Player2Win	
+
+	LDI R1, 0b00011100	
+	AND R1, P2_DIODES
+	CP  R1, 0b00011100	
+	BREQ Player2Win	
+
+	LDI R1, 0b10010010	
+	AND R1, P2_DIODES
+	CP  R1, 0b10010010
+	BREQ Player2Win	
+			
+	LDI R1, 0b01001001
+	AND R1, P2_DIODES
+	CP  R1, 0b01001001
+	BREQ Player2Win
+
+	LDI R1, 0b00101010
+	AND R1, P2_DIODES
+	CP  R1, 0b00101010
+	BREQ Player2Win
+
+;SPRAWDZANIE CZY OSTATNIA DIODA P1 JEST WLACZONA JEZELI TAK TO MOZNA SPRAWDZAC WARUNKI KTORE JA OBEJMUJA
+	LDI R1, 0b00000001
+	AND R1, LAST_DIODES
+	CP  R1, 0b00000001
+	BREQ CheckWithLastDiodeP1
+
+;SPRAWDZANIE CZY OSTATNIA DIODA P2 JEST WLACZONA JEZELI TAK TO MOZNA SPRAWDZAC WARUNKI KTORE JA OBEJMUJA
+P2LastDiodeCheck:
+	LDI R1, 0b00000010
+	AND R1, LAST_DIODES
+	CP  R1, 0b00000010
+	BREQ CheckWithLastDiodeP2
+
+	;petla glowna
     rjmp start
+
+;Sprawdzanie wygranej z ostatnia dioda P1
+CheckWithLastDiodeP1:
+	LDI R1, 0b00000011	
+	AND R1, P1_DIODES
+	CP  R1, 0b00000011
+	BREQ Player1Win	
+			
+	LDI R1, 0b00100100
+	AND R1, P1_DIODES
+	CP  R1, 0b00100100
+	BREQ Player1Win
+
+	LDI R1, 0b10001000
+	AND R1, P1_DIODES
+	CP  R1, 0b10001000
+	BREQ Player1Win
+
+	rjmp P2LastDiodeCheck
+
+;Sprawdzanie wygranej z ostatnia dioda P2
+CheckWithLastDiodeP1:
+	LDI R1, 0b00000011	
+	AND R1, P2_DIODES
+	CP  R1, 0b00000011
+	BREQ Player2Win	
+			
+	LDI R1, 0b00100100
+	AND R1, P2_DIODES
+	CP  R1, 0b00100100
+	BREQ Player2Win
+
+	LDI R1, 0b10001000
+	AND R1, P2_DIODES
+	CP  R1, 0b10001000
+	BREQ Player2Win
+
+	;JEZELI NIKT NIE WYGRAL TO LECI PETLA GLOWNA
+	rjmp start
+
+;WYGRANA P1
+Player1Win:
+	RCALL alldiodesOFF
+	rjmp SETUP
+;Wygrana P2
+Player2Win:
+	RCALL alldiodesOFF
+	rjmp SETUP
+
 
 ; BREQ moze skonczyc maksymalnie o 64 instrukcje. RJMP o 2K (w switch bylo za krotko) wiec trzeba wykonac dlugi skok jmp - 4M
 longsetdiode9:
