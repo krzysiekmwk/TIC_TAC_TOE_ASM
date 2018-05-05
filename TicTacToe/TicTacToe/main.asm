@@ -101,7 +101,8 @@ start:	; Glowna petla programu
 	BREQ longsetdiode1
 
 	rjmp dalej
-	
+//////////INTRUKCJE POZA PETLA PROGRAMU//////////////////////////////////////////////////////////////////////////////////////////////////////
+
 ; BREQ moze skonczyc maksymalnie o 64 instrukcje. RJMP o 2K (w switch bylo za krotko) wiec trzeba wykonac dlugi skok jmp - 4M
 longsetdiode9:
 	jmp checkAndSetDiodeRegister9
@@ -122,70 +123,66 @@ longsetdiode2:
 longsetdiode1:
 	jmp checkAndSetDiodeRegister1
 
+;Sprawdzanie wygranej z ostatnia dioda P1
+CheckWithLastDiodeP1:
+	LDI R31, 0b11000000
+	LDI R17, 0b11000000
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win	
+			
+	LDI R31, 0b00100100
+	LDI R17, 0b00100100
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win
+
+	LDI R31, 0b00010001
+	LDI R17, 0b00010001
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win
+
+	rjmp P2LastDiodeCheck
+
+;Sprawdzanie wygranej z ostatnia dioda P2
+CheckWithLastDiodeP2:
+	LDI R31, 0b11000000
+	LDI R17, 0b11000000		
+	AND R31, P2_DIODES
+	CP  R31, R17
+	BREQ Player2Win	
+			
+	LDI R31, 0b00100100
+	LDI R17, 0b00100100
+	AND R31, P2_DIODES
+	CP  R31, R17
+	BREQ Player2Win
+
+	LDI R31, 0b00010001
+	LDI R17, 0b00010001
+	AND R31, P2_DIODES
+	CP  R31, R17
+	BREQ Player2Win
+
+	;JEZELI NIKT NIE WYGRAL TO SPRAWDZEN CZY REMIS
+	rjmp IfDraw
+
+	
+;WYGRANA P1 jest tutaj bo relative branch nie siega
+Player1Win:
+	RCALL alldiodesOFF
+	rjmp SETUP
+;Wygrana P2
+Player2Win:
+	RCALL alldiodesOFF
+	rjmp SETUP
+//////////INTRUKCJE POZA PETLA PROGRAMU//////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	dalej:				; miejsce do powrotu z funcji warunkowych
 
-	//Sprawdzenie kto wygral
-;sprawdzenie P1 bez ostatniej diody
-	LDI R31, 0b11100000
-	LDI R17, 0b11100000
-	AND R31, P1_DIODES
-	CP  R31, R17
-	BREQ Player1Win	
+	//Sprawdzenie kto wygral///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	LDI R31, 0b00011100	
-	LDI R17, 0b00011100	
-	AND R31, P1_DIODES
-	CP  R31, R17
-	BREQ Player1Win	
-
-	LDI R31, 0b10010010	
-	LDI R17, 0b10010010	
-	AND R31, P1_DIODES
-	CP  R31, R17
-	BREQ Player1Win	
-			
-	LDI R31, 0b01001001
-	LDI R17, 0b01001001
-	AND R31, P1_DIODES
-	CP  R31, R17
-	BREQ Player1Win
-
-	LDI R31, 0b00101010
-	LDI R17, 0b00101010
-	AND R31, P1_DIODES
-	CP  R31, R17
-	BREQ Player1Win
-
-;Wygrane P2 bez ostatniej diody
-	LDI R31, 0b11100000	
-	LDI R17, 0b11100000
-	AND R31, P2_DIODES
-	CP  R31, R17	
-	BREQ Player2Win	
-
-	LDI R31, 0b00011100	
-	LDI R17, 0b00011100	
-	AND R31, P2_DIODES
-	CP  R31, R17
-	BREQ Player2Win	
-
-	LDI R31, 0b10010010	
-	LDI R17, 0b10010010	
-	AND R31, P2_DIODES
-	CP  R31, R17 
-	BREQ Player2Win	
-			
-	LDI R31, 0b01001001
-	LDI R17, 0b01001001
-	AND R31, P2_DIODES
-	CP  R31, R17
-	BREQ Player2Win
-
-	LDI R31, 0b00101010
-	LDI R17, 0b00101010
-	AND R31, P2_DIODES
-	CP  R31, R17
-	BREQ Player2Win
 
 ;SPRAWDZANIE CZY OSTATNIA DIODA P1 JEST WLACZONA JEZELI TAK TO MOZNA SPRAWDZAC WARUNKI KTORE JA OBEJMUJA
 	LDI R31, 0b00000001
@@ -202,62 +199,91 @@ P2LastDiodeCheck:
 	CP  R31, R17
 	BREQ CheckWithLastDiodeP2
 
-	;petla glowna
-    rjmp start
+;sprawdzenie P1 bez ostatniej diody
+;rzad
+	LDI R31, 0b00000111
+	LDI R17, 0b00000111
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win	
 
-;WYGRANA P1 jest tutaj bo relative branch nie siega
-Player1Win:
-	RCALL alldiodesOFF
-	rjmp SETUP
-;Wygrana P2
-Player2Win:
-	RCALL alldiodesOFF
-	rjmp SETUP
-
-;Sprawdzanie wygranej z ostatnia dioda P1
-CheckWithLastDiodeP1:
-	LDI R31, 0b00000011	
-	LDI R17, 0b00000011	
+	LDI R31, 0b00111000
+	LDI R17, 0b00111000
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win	
+;pion
+	LDI R31, 0b10010010	
+	LDI R17, 0b10010010	
 	AND R31, P1_DIODES
 	CP  R31, R17
 	BREQ Player1Win	
 			
-	LDI R31, 0b00100100
-	LDI R17, 0b00100100
+	LDI R31, 0b01001001
+	LDI R17, 0b01001001
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win
+;ukos
+	LDI R31, 0b01010100
+	LDI R17, 0b01010100
 	AND R31, P1_DIODES
 	CP  R31, R17
 	BREQ Player1Win
 
-	LDI R31, 0b10001000
-	LDI R17, 0b10001000
-	AND R31, P1_DIODES
-	CP  R31, R17
-	BREQ Player1Win
+;Wygrane P2 bez ostatniej diody
+;rzad
+	LDI R31, 0b00000111
+	LDI R17, 0b00000111
+	AND R31, P2_DIODES
+	CP  R31, R17	
+	BREQ Player2Win	
 
-	rjmp P2LastDiodeCheck
-
-;Sprawdzanie wygranej z ostatnia dioda P2
-CheckWithLastDiodeP2:
-	LDI R31, 0b00000011
-	LDI R17, 0b00000011		
+	LDI R31, 0b00111000
+	LDI R17, 0b00111000
 	AND R31, P2_DIODES
 	CP  R31, R17
 	BREQ Player2Win	
+;pion
+	LDI R31, 0b10010010	
+	LDI R17, 0b10010010	
+	AND R31, P2_DIODES
+	CP  R31, R17 
+	BREQ Player2Win	
 			
-	LDI R31, 0b00100100
-	LDI R17, 0b00100100
+	LDI R31, 0b01001001
+	LDI R17, 0b01001001
+	AND R31, P2_DIODES
+	CP  R31, R17
+	BREQ Player2Win
+;ukos
+	LDI R31, 0b01010100
+	LDI R17, 0b01010100
 	AND R31, P2_DIODES
 	CP  R31, R17
 	BREQ Player2Win
 
-	LDI R31, 0b10001000
-	LDI R17, 0b10001000
-	AND R31, P2_DIODES
-	CP  R31, R17
-	BREQ Player2Win
+;czy remis
+IfDraw:
+	LDI R31, 0x00
+	CP LAST_DIODES, R31 ;jezeli LAST_DIODES jest NIERÓWNE 0 to znaczy ze ktores jest zaswiecone wiec jest sens sprawdzac dalej
+	BREQ NotDraw
 
-	;JEZELI NIKT NIE WYGRAL TO LECI PETLA GLOWNA
-	rjmp start
+	LDI R31, 0xFF
+	MOV R17, P1_DIODES 
+	OR R17, P2_DIODES ;jezeli wszystkie pola zostaly juz wykorzystane to remis
+	CP R17, R31
+	BREQ Draw
+
+NotDraw:
+	;petla glowna
+    rjmp start
+
+;remis
+Draw:
+	RCALL alldiodesOFF
+	rjmp SETUP
+
 
 
 
