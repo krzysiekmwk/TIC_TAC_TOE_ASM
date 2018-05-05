@@ -22,11 +22,11 @@ SETUP:
 .DEF LED_NUMBER = R16	; Miejsce w pamieci na diode ktora ma sie zapalic
 LDI LED_NUMBER, 0x09
 
-cli						; wylšczenie przerwan
+cli						; wylÅ¡czenie przerwan
 ldi R16, HIGH(RAMEND)   ; zaladowanie adresu konca pamieci[stala RAMEND - zdefiniowana w pliku](starszej jego czesci) SRAM do R16 
 out SPH, R16            ; zaladowanie zawartosci rejestru R16 do SPH(starszej czesci) rejestru ktory przechowuje tzw. wskaznik konca stosu 
 ldi R16, LOW(RAMEND)    ; zaladowanie (mlodszej czesci) adresu konca pamieci sram do R16 
-out SPL, R16			; przepisanie R16 do SPL - rejestru który przechowuje wskaznik konca stosu(mlodszej czesci) 
+out SPL, R16			; przepisanie R16 do SPL - rejestru ktÃ³ry przechowuje wskaznik konca stosu(mlodszej czesci) 
 
 .DEF BUTTON_PIN = R21		; Miejsce w pamieci na ktory zostal wcisniety
 LDI BUTTON_PIN, 0x00		; Przypisanie zera do przycisku - zaden nie zostal wcisniety
@@ -34,7 +34,7 @@ LDI BUTTON_PIN, 0x00		; Przypisanie zera do przycisku - zaden nie zostal wcisnie
 LDI R31, 0b00111000		; PIN 3,4,5 portu B ustawione jako wyjscia
 OUT DDRB, R31			; Przypisanie wartosci do portu
 LDI R31, 0b00111111		; rezystory pull-up na pinie 0,1,2,3,4,5
-OUT PORTB, R31			; Przypisanie wartosci do portu. Sterowanie bêdzie 0
+OUT PORTB, R31			; Przypisanie wartosci do portu. Sterowanie bÄ™dzie 0
 
 ldi R31, 0b00000111		; Ustawienie portu C jako wyjscia (domyslnie stan 1, ale jako ze kolumna steruje 0, to to sie bedzie pozniej zmieniac)
 out DDRC, R31
@@ -165,8 +165,8 @@ CheckWithLastDiodeP2:
 	CP  R31, R17
 	BREQ Player2Win
 
-	;JEZELI NIKT NIE WYGRAL TO SPRAWDZEN CZY REMIS
-	rjmp IfDraw
+	;JEZELI NIKT NIE WYGRAL TO SPRAWDZAJ DALEJ
+	rjmp CheckNextOptions
 
 	
 ;WYGRANA P1 jest tutaj bo relative branch nie siega
@@ -198,6 +198,8 @@ P2LastDiodeCheck:
 	AND R31, LAST_DIODES
 	CP  R31, R17
 	BREQ CheckWithLastDiodeP2
+	
+CheckNextOptions: ;wyjscie z CheckWithLastDiodeP2
 
 ;sprawdzenie P1 bez ostatniej diody
 ;rzad
@@ -266,7 +268,7 @@ P2LastDiodeCheck:
 ;czy remis
 IfDraw:
 	LDI R31, 0x00
-	CP LAST_DIODES, R31 ;jezeli LAST_DIODES jest NIERÓWNE 0 to znaczy ze ktores jest zaswiecone wiec jest sens sprawdzac dalej
+	CP LAST_DIODES, R31 ;jezeli LAST_DIODES jest NIERÃ“WNE 0 to znaczy ze ktores jest zaswiecone wiec jest sens sprawdzac dalej
 	BREQ NotDraw
 
 	LDI R31, 0xFF
