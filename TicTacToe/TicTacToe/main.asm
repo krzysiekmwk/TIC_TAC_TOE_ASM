@@ -123,6 +123,128 @@ longsetdiode2:
 longsetdiode1:
 	jmp checkAndSetDiodeRegister1
 
+	
+Player1WinShowLeds:
+	;Zgas wszystkie diody, zapal wszystkie z danego playera i nimi zmrugaj
+	RCALL alldiodesOFF
+	RCALL setP1
+	LDI P2_DIODES, 0b00000000
+	LDI P1_DIODES, 0b11111111
+	LDI LAST_DIODES, 0b00000001
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	LDI P1_DIODES, 0b00000000
+	LDI LAST_DIODES, 0b00000000
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL setP1
+	LDI P1_DIODES, 0b11111111
+	LDI LAST_DIODES, 0b00000001
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	LDI P1_DIODES, 0b00000000
+	LDI LAST_DIODES, 0b00000000
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL setP1
+	LDI P1_DIODES, 0b11111111
+	LDI LAST_DIODES, 0b00000001
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	LDI P1_DIODES, 0b00000000
+	LDI LAST_DIODES, 0b00000000
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL setP1
+	LDI P1_DIODES, 0b11111111
+	LDI LAST_DIODES, 0b00000001
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	LDI P1_DIODES, 0b00000000
+	LDI LAST_DIODES, 0b00000000
+	rjmp SETUP
+	
+Player2WinShowLeds:
+	RCALL alldiodesOFF
+	RCALL setP2
+	LDI P1_DIODES, 0b00000000
+	LDI P2_DIODES, 0b11111111
+	LDI LAST_DIODES, 0b00000010
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	LDI P2_DIODES, 0b00000000
+	LDI LAST_DIODES, 0b00000000
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL setP2
+	LDI P2_DIODES, 0b11111111
+	LDI LAST_DIODES, 0b00000010
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	LDI P2_DIODES, 0b00000000
+	LDI LAST_DIODES, 0b00000000
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL setP2
+	LDI P2_DIODES, 0b11111111
+	LDI LAST_DIODES, 0b00000010
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	LDI P2_DIODES, 0b00000000
+	LDI LAST_DIODES, 0b00000000
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL setP2
+	LDI P2_DIODES, 0b11111111
+	LDI LAST_DIODES, 0b00000010
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	LDI P2_DIODES, 0b00000000
+	LDI LAST_DIODES, 0b00000000
+	rjmp SETUP
+
 ;Sprawdzanie wygranej z ostatnia dioda P1
 CheckWithLastDiodeP1:
 	LDI R31, 0b11000000
@@ -167,76 +289,6 @@ CheckWithLastDiodeP2:
 
 	;JEZELI NIKT NIE WYGRAL TO SPRAWDZAJ DALEJ
 	rjmp CheckNextOptions
-	
-	
-Player1WinShowLeds:
-	;Zgas wszystkie diody, zapal wszystkie z danego playera i nimi zmrugaj
-	RCALL alldiodesOFF
-	RCALL setP1
-	LDI P1_DIODES, 0b11111111
-	LDI LAST_DIODES, 0b00000001
-	RCALL delay50ms
-	RCALL delay50ms
-	RCALL alldiodesOFF
-	RCALL delay50ms
-	RCALL delay50ms
-	RCALL setP1
-	LDI P1_DIODES, 0b11111111
-	LDI LAST_DIODES, 0b00000001
-	RCALL delay50ms
-	RCALL delay50ms
-	RCALL alldiodesOFF
-	RCALL delay50ms
-	RCALL delay50ms
-	RCALL setP1
-	LDI P1_DIODES, 0b11111111
-	LDI LAST_DIODES, 0b00000001
-	RCALL delay50ms
-	RCALL delay50ms
-	RCALL alldiodesOFF
-	RCALL delay50ms
-	RCALL delay50ms
-	RCALL setP1
-	LDI P1_DIODES, 0b11111111
-	LDI LAST_DIODES, 0b00000001
-	RCALL delay50ms
-	RCALL delay50ms
-	RCALL alldiodesOFF
-	rjmp SETUP
-	
-Player2WinShowLeds:
-	RCALL alldiodesOFF
-	RCALL setP2
-	LDI P2_DIODES, 0b11111111
-	LDI LAST_DIODES, 0b00000010
-	RCALL delay50ms
-	RCALL delay50ms
-	RCALL alldiodesOFF
-	RCALL delay50ms
-	RCALL delay50ms
-	RCALL setP2
-	LDI P2_DIODES, 0b11111111
-	LDI LAST_DIODES, 0b00000010
-	RCALL delay50ms
-	RCALL delay50ms
-	RCALL alldiodesOFF
-	RCALL delay50ms
-	RCALL delay50ms
-	RCALL setP2
-	LDI P2_DIODES, 0b11111111
-	LDI LAST_DIODES, 0b00000010
-	RCALL delay50ms
-	RCALL delay50ms
-	RCALL alldiodesOFF
-	RCALL delay50ms
-	RCALL delay50ms
-	RCALL setP2
-	LDI P2_DIODES, 0b11111111
-	LDI LAST_DIODES, 0b00000010
-	RCALL delay50ms
-	RCALL delay50ms
-	RCALL alldiodesOFF
-	rjmp SETUP
 	
 ;WYGRANA P1 jest tutaj bo relative branch nie siega
 Player1Win:
