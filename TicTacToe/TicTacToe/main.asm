@@ -22,11 +22,11 @@ SETUP:
 .DEF LED_NUMBER = R16	; Miejsce w pamieci na diode ktora ma sie zapalic
 LDI LED_NUMBER, 0x09
 
-cli						; wyl¹czenie przerwan
+cli						; wylÅ¡czenie przerwan
 ldi R16, HIGH(RAMEND)   ; zaladowanie adresu konca pamieci[stala RAMEND - zdefiniowana w pliku](starszej jego czesci) SRAM do R16 
 out SPH, R16            ; zaladowanie zawartosci rejestru R16 do SPH(starszej czesci) rejestru ktory przechowuje tzw. wskaznik konca stosu 
 ldi R16, LOW(RAMEND)    ; zaladowanie (mlodszej czesci) adresu konca pamieci sram do R16 
-out SPL, R16			; przepisanie R16 do SPL - rejestru który przechowuje wskaznik konca stosu(mlodszej czesci) 
+out SPL, R16			; przepisanie R16 do SPL - rejestru ktÃ³ry przechowuje wskaznik konca stosu(mlodszej czesci) 
 
 .DEF BUTTON_PIN = R21		; Miejsce w pamieci na ktory zostal wcisniety
 LDI BUTTON_PIN, 0x00		; Przypisanie zera do przycisku - zaden nie zostal wcisniety
@@ -34,7 +34,7 @@ LDI BUTTON_PIN, 0x00		; Przypisanie zera do przycisku - zaden nie zostal wcisnie
 LDI R31, 0b00111000		; PIN 3,4,5 portu B ustawione jako wyjscia
 OUT DDRB, R31			; Przypisanie wartosci do portu
 LDI R31, 0b00111111		; rezystory pull-up na pinie 0,1,2,3,4,5
-OUT PORTB, R31			; Przypisanie wartosci do portu. Sterowanie bêdzie 0
+OUT PORTB, R31			; Przypisanie wartosci do portu. Sterowanie bÄ™dzie 0
 
 ldi R31, 0b00000111		; Ustawienie portu C jako wyjscia (domyslnie stan 1, ale jako ze kolumna steruje 0, to to sie bedzie pozniej zmieniac)
 out DDRC, R31
@@ -100,11 +100,8 @@ start:	; Glowna petla programu
 	CP BUTTON_PIN, R30	; case BUTTON_PIN == 1
 	BREQ longsetdiode1
 
-	dalej:				; miejsce do powrotu z funcji warunkowych
-
-	//Sprawdzenie kto wygral
-
-    rjmp start
+	rjmp dalej
+//////////INTRUKCJE POZA PETLA PROGRAMU//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ; BREQ moze skonczyc maksymalnie o 64 instrukcje. RJMP o 2K (w switch bylo za krotko) wiec trzeba wykonac dlugi skok jmp - 4M
 longsetdiode9:
@@ -125,6 +122,293 @@ longsetdiode2:
 	jmp checkAndSetDiodeRegister2
 longsetdiode1:
 	jmp checkAndSetDiodeRegister1
+
+	
+Player1WinShowLeds:
+	;Zgas wszystkie diody, zapal wszystkie z danego playera i nimi zmrugaj
+	RCALL alldiodesOFF
+	RCALL setP1
+	LDI P2_DIODES, 0b00000000
+	LDI P1_DIODES, 0b11111111
+	LDI LAST_DIODES, 0b00000001
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	LDI P1_DIODES, 0b00000000
+	LDI LAST_DIODES, 0b00000000
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL setP1
+	LDI P1_DIODES, 0b11111111
+	LDI LAST_DIODES, 0b00000001
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	LDI P1_DIODES, 0b00000000
+	LDI LAST_DIODES, 0b00000000
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL setP1
+	LDI P1_DIODES, 0b11111111
+	LDI LAST_DIODES, 0b00000001
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	LDI P1_DIODES, 0b00000000
+	LDI LAST_DIODES, 0b00000000
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL setP1
+	LDI P1_DIODES, 0b11111111
+	LDI LAST_DIODES, 0b00000001
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	LDI P1_DIODES, 0b00000000
+	LDI LAST_DIODES, 0b00000000
+	rjmp SETUP
+	
+Player2WinShowLeds:
+	RCALL alldiodesOFF
+	RCALL setP2
+	LDI P1_DIODES, 0b00000000
+	LDI P2_DIODES, 0b11111111
+	LDI LAST_DIODES, 0b00000010
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	LDI P2_DIODES, 0b00000000
+	LDI LAST_DIODES, 0b00000000
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL setP2
+	LDI P2_DIODES, 0b11111111
+	LDI LAST_DIODES, 0b00000010
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	LDI P2_DIODES, 0b00000000
+	LDI LAST_DIODES, 0b00000000
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL setP2
+	LDI P2_DIODES, 0b11111111
+	LDI LAST_DIODES, 0b00000010
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	LDI P2_DIODES, 0b00000000
+	LDI LAST_DIODES, 0b00000000
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL setP2
+	LDI P2_DIODES, 0b11111111
+	LDI LAST_DIODES, 0b00000010
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	RCALL delay50ms
+	LDI P2_DIODES, 0b00000000
+	LDI LAST_DIODES, 0b00000000
+	rjmp SETUP
+
+;Sprawdzanie wygranej z ostatnia dioda P1
+CheckWithLastDiodeP1:
+	LDI R31, 0b11000000
+	LDI R17, 0b11000000
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win	
+			
+	LDI R31, 0b00100100
+	LDI R17, 0b00100100
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win
+
+	LDI R31, 0b00010001
+	LDI R17, 0b00010001
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win
+
+	rjmp P2LastDiodeCheck
+
+;Sprawdzanie wygranej z ostatnia dioda P2
+CheckWithLastDiodeP2:
+	LDI R31, 0b11000000
+	LDI R17, 0b11000000		
+	AND R31, P2_DIODES
+	CP  R31, R17
+	BREQ Player2Win	
+			
+	LDI R31, 0b00100100
+	LDI R17, 0b00100100
+	AND R31, P2_DIODES
+	CP  R31, R17
+	BREQ Player2Win
+
+	LDI R31, 0b00010001
+	LDI R17, 0b00010001
+	AND R31, P2_DIODES
+	CP  R31, R17
+	BREQ Player2Win
+
+	;JEZELI NIKT NIE WYGRAL TO SPRAWDZAJ DALEJ
+	rjmp CheckNextOptions
+	
+;WYGRANA P1 jest tutaj bo relative branch nie siega
+Player1Win:
+	rjmp Player1WinShowLeds
+;Wygrana P2
+Player2Win:
+	rjmp Player2WinShowLeds
+	;RCALL alldiodesOFF
+	;rjmp SETUP
+//////////INTRUKCJE POZA PETLA PROGRAMU//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	dalej:				; miejsce do powrotu z funcji warunkowych
+
+	//Sprawdzenie kto wygral///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+;SPRAWDZANIE CZY OSTATNIA DIODA P1 JEST WLACZONA JEZELI TAK TO MOZNA SPRAWDZAC WARUNKI KTORE JA OBEJMUJA
+	LDI R31, 0b00000001
+	LDI R17, 0b00000001
+	AND R31, LAST_DIODES
+	CP  R31, R17
+	BREQ CheckWithLastDiodeP1
+
+;SPRAWDZANIE CZY OSTATNIA DIODA P2 JEST WLACZONA JEZELI TAK TO MOZNA SPRAWDZAC WARUNKI KTORE JA OBEJMUJA
+P2LastDiodeCheck:
+	LDI R31, 0b00000010
+	LDI R17, 0b00000010
+	AND R31, LAST_DIODES
+	CP  R31, R17
+	BREQ CheckWithLastDiodeP2
+	
+CheckNextOptions: ;wyjscie z CheckWithLastDiodeP2
+
+;sprawdzenie P1 bez ostatniej diody
+;rzad
+	LDI R31, 0b00000111
+	LDI R17, 0b00000111
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win	
+
+	LDI R31, 0b00111000
+	LDI R17, 0b00111000
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win	
+;pion
+	LDI R31, 0b10010010	
+	LDI R17, 0b10010010	
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win	
+			
+	LDI R31, 0b01001001
+	LDI R17, 0b01001001
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win
+;ukos
+	LDI R31, 0b01010100
+	LDI R17, 0b01010100
+	AND R31, P1_DIODES
+	CP  R31, R17
+	BREQ Player1Win
+
+;Wygrane P2 bez ostatniej diody
+;rzad
+	LDI R31, 0b00000111
+	LDI R17, 0b00000111
+	AND R31, P2_DIODES
+	CP  R31, R17	
+	BREQ Player2Win	
+
+	LDI R31, 0b00111000
+	LDI R17, 0b00111000
+	AND R31, P2_DIODES
+	CP  R31, R17
+	BREQ Player2Win	
+;pion
+	LDI R31, 0b10010010	
+	LDI R17, 0b10010010	
+	AND R31, P2_DIODES
+	CP  R31, R17 
+	BREQ Player2Win	
+			
+	LDI R31, 0b01001001
+	LDI R17, 0b01001001
+	AND R31, P2_DIODES
+	CP  R31, R17
+	BREQ Player2Win
+;ukos
+	LDI R31, 0b01010100
+	LDI R17, 0b01010100
+	AND R31, P2_DIODES
+	CP  R31, R17
+	BREQ Player2Win
+
+;czy remis
+IfDraw:
+	LDI R31, 0x00
+	CP LAST_DIODES, R31 ;jezeli LAST_DIODES jest NIERÃ“WNE 0 to znaczy ze ktores jest zaswiecone wiec jest sens sprawdzac dalej
+	BREQ NotDraw
+
+	LDI R31, 0xFF
+	MOV R17, P1_DIODES 
+	OR R17, P2_DIODES ;jezeli wszystkie pola zostaly juz wykorzystane to remis
+	CP R17, R31
+	BREQ Draw
+
+NotDraw:
+	;petla glowna
+    rjmp start
+
+;remis
+Draw:
+	RCALL alldiodesOFF
+	rjmp SETUP
+
+
+
 
 //Schemat dzialania: 
 //Sprawdzic czy nie nie jest juz cos ustawione na danym pinie (OR, a potem AND)
